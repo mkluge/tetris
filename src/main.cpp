@@ -1,5 +1,7 @@
 #include <Adafruit_NeoPixel.h>
 
+
+
 #define PIN D2
 // How many NeoPixels are attached to the Arduino?
 #define NUMPIXELS 5

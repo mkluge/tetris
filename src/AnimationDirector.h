@@ -1,15 +1,17 @@
 #ifndef ANIMATEDDISPLAY_H
 #define ANIMATEDDISPLAY_H
 
+#include <list>
+#include <functional>
 #include <Animation.h>
 
 #pragma once
 
-class AnimatedDisplay
+class AnimationDirector
 {
 public:
-    AnimatedDisplay(int width, int height);
-    ~AnimatedDisplay();
+    AnimationDirector(int width, int height);
+    ~AnimationDirector();
 
     void animate();
     int addAnimation(const Animation &animation);
@@ -17,6 +19,7 @@ public:
 private:
     int width;
     int height;
+    std::list<std::reference_wrapper<Animation>> animations;
 };
 
 #endif

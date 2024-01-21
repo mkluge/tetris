@@ -1,24 +1,10 @@
 #include "Animation.h"
 
-Animation::Animation()
-{
-
-}
-
 Animation::~Animation()
 {
-
 }
-void Animation::rotate(int direction, bool keepInside)
+
+Animation::Animation(LEDDisplay &display, int base_x, int base_y) : 
+    display(display), base_x(base_x), base_y(base_y)
 {
-    // rotation matrix in 2D is
-    // R = ( cos(a) -sin(a))
-    //     ( sin(a)  cos(a))
-    // so 90 degrees is
-    // R = ( 0 -1 ) -> -y+x
-    //     ( 1  0 )
-    // -90 dregees is: 
-    // R = ( 0  1 ) -> y-x
-    //     ( -1 0 )
-    
 }

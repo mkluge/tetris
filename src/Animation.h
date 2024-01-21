@@ -1,27 +1,37 @@
 #ifndef ANIMATION_H
 #define ANIMATION_H
 
-#include <AnimatedDisplay.h>
+#include <Basics.h>
+#include <LEDDisplay.h>
 
 #pragma once
 
-struct Rect{
-    int start_x;
-    int start_y;
-    int end_x;
-    int end_y;
-};
+// rotation matrix in 2D is
+// R = ( cos(a) -sin(a))
+//     ( sin(a)  cos(a))
+// so 90 degrees is
+// R = ( 0 -1 ) -> -y+x
+//     ( 1  0 )
+// -90 dregees is:
+// R = ( 0  1 ) -> y-x
+//     ( -1 0 )
 
-struct Animation
+class Animation
 {
-    virtual void start(int base_x, int base_y) = 0;
+public:
+    Animation(LEDDisplay &display, int base_x, int base_y);
     virtual void animate() = 0;
-    virtual void rotate(int direction, bool keepInside=false) = 0;
-    virtual void translate(int x, int y, bool keepInside=false) = 0; 
-    virtual void setColor( int red, int green, int blue) = 0;
-    virtual Rect boundingBox() = 0 ;
+    virtual void rotate(int direction, bool keepInside = false) = 0;
+    virtual void translat(int x, int y, bool keepInside = false) = 0;
+    virtual void setColor(int red, int green, int blue) = 0;
+    virtual Rect boundingBox() = 0;
     // for tetris
     virtual void removeLine() = 0;
+
+private:
+    int base_x;
+    int base_y;
+    LEDDisplay &display;
 };
 
 #endif
