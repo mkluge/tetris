@@ -5,8 +5,7 @@
 
 #pragma once
 
-struct Rect
-{
+struct Rect {
     int start_x;
     int start_y;
     int end_x;
@@ -17,6 +16,12 @@ struct RGB {
     unsigned short red;
     unsigned short green;
     unsigned short blue;    
+};
+
+struct Pixel {
+    int x;
+    int y;
+    RGB color;
 };
 
 #endif

@@ -3,35 +3,34 @@
 
 #include <Basics.h>
 #include <LEDDisplay.h>
+#include <list>
 
 #pragma once
-
-// rotation matrix in 2D is
-// R = ( cos(a) -sin(a))
-//     ( sin(a)  cos(a))
-// so 90 degrees is
-// R = ( 0 -1 ) -> -y+x
-//     ( 1  0 )
-// -90 dregees is:
-// R = ( 0  1 ) -> y-x
-//     ( -1 0 )
 
 class Animation
 {
 public:
+    enum Rotation
+    {
+        LEFT,
+        RIGHT,
+    };
+
     Animation(LEDDisplay &display, int base_x, int base_y);
-    virtual void animate() = 0;
-    virtual void rotate(int direction, bool keepInside = false) = 0;
-    virtual void translat(int x, int y, bool keepInside = false) = 0;
-    virtual void setColor(int red, int green, int blue) = 0;
-    virtual Rect boundingBox() = 0;
-    // for tetris
-    virtual void removeLine() = 0;
+    virtual void rotate(Rotation direction, bool keepInside = false);
+    virtual void translate(int x, int y, bool keepInside = false);
+    virtual void setColor(unsigned short red, unsigned short green, unsigned short blue);
+    virtual void moveInside();
+    virtual Rect boundingBox();
+    virtual void paint();
+    // for Tetris
+    virtual void removeLine(int line);
 
 private:
     int base_x;
     int base_y;
     LEDDisplay &display;
+    std::list<Pixel> pixels;
 };
 
 #endif

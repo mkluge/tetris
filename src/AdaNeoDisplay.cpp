@@ -1,9 +1,14 @@
 #include "AdaNeoDisplay.h"
 
+AdaNeoDisplay::AdaNeoDisplay(int size_x, int size_y, int pin) : size_x(size_x), size_y(size_y), pin(pin)
+{
+    numpixels = size_x * size_y;
+    pixels = Adafruit_NeoPixel(numpixels, pin, NEO_GRB + NEO_KHZ800);
+    pixels.begin();
+}
 
 AdaNeoDisplay::~AdaNeoDisplay()
 {
-
 }
 
 void AdaNeoDisplay::setPixel(int x, int y, RGB value)
@@ -28,20 +33,13 @@ void AdaNeoDisplay::clear()
     this->show();
 }
 
-int AdaNeoDisplay::width()
+const int AdaNeoDisplay::width() const
 {
     return size_x;
 }
 
-int AdaNeoDisplay::height()
+const int AdaNeoDisplay::height() const
 {
     return size_y;
 }
 
-AdaNeoDisplay::AdaNeoDisplay(int size_x, int size_y, int pin): 
-size_x(size_x), size_y(size_y), pin(pin)
-{
-    numpixels = size_x * size_y;
-    pixels = Adafruit_NeoPixel( numpixels, pin, NEO_GRB + NEO_KHZ800);
-    pixels.begin();
-}

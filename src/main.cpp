@@ -1,21 +1,22 @@
-#include <Adafruit_NeoPixel.h>
-
-
+#include <AdaNeoDisplay.h>
+#include <TestAnimation.h>
 
 #define PIN D2
-// How many NeoPixels are attached to the Arduino?
-#define NUMPIXELS 5
+#define PIXELS_X 8
+#define PIXELS_Y 12
 
-Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
+AdaNeoDisplay display = AdaNeoDisplay( PIXELS_X, PIXELS_Y, PIN);
+TestAnimation animation = TestAnimation( display, 0, 0);
 
 void setup()
 {
-  pixels.begin();
-  randomSeed(0);
 }
 
 void loop()
 {
+
+  int delayval = 5;
+
   static int light=255;
   static int pixel = (int)random() % NUMPIXELS;
   int delayval = 5; // delay for half a second
