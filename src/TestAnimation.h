@@ -5,14 +5,11 @@
 
 #pragma once
 
-class TestAnimation : Animation
+class TestAnimation : public Animation
 {
 public:
     TestAnimation(LEDDisplay &display, int base_x, int base_y);
     ~TestAnimation();
-    
-
-private:
 };
 
 #endif

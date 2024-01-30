@@ -1,10 +1,6 @@
 #include "Animation.h"
 
-Animation::~Animation()
-{
-}
-
-Animation::Animation(LEDDisplay &display, int base_x, int base_y) : display(display), base_x(base_x), base_y(base_y)
+Animation::Animation(LEDDisplay &display) : display(display)
 {
 }
 
@@ -115,13 +111,16 @@ Rect Animation::boundingBox()
             retval.end_y = pixel.y;
         }
     }
+    return retval;
 }
 
 void Animation::paint()
 {
     for (auto &pixel : pixels)
     {
-        display.setPixel(pixel.x, pixel.y, pixel.color);
+        display.setPixel(pixel.x,
+                         pixel.y,
+                         pixel.color);
     }
 }
 /**
@@ -137,7 +136,7 @@ void Animation::removeLine(int line)
             new_pixels.push_back(pixel);
         }
         // all ==line pixels are removed
-        else if(pixel.y > line)
+        else if (pixel.y > line)
         {
             pixel.y--;
             new_pixels.push_back(pixel);

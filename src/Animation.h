@@ -16,7 +16,7 @@ public:
         RIGHT,
     };
 
-    Animation(LEDDisplay &display, int base_x, int base_y);
+    Animation(LEDDisplay &display);
     virtual void rotate(Rotation direction, bool keepInside = false);
     virtual void translate(int x, int y, bool keepInside = false);
     virtual void setColor(unsigned short red, unsigned short green, unsigned short blue);
@@ -26,9 +26,7 @@ public:
     // for Tetris
     virtual void removeLine(int line);
 
-private:
-    int base_x;
-    int base_y;
+protected:
     LEDDisplay &display;
     std::list<Pixel> pixels;
 };

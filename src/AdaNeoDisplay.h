@@ -6,12 +6,13 @@
 
 #pragma once
 
-class AdaNeoDisplay : LEDDisplay
+class AdaNeoDisplay : public LEDDisplay
 {
 public:
     AdaNeoDisplay( const int size_x, const int size_y, const int pin);
     ~AdaNeoDisplay();
     void setPixel(const int x, const int y, const RGB value);
+    void delPixel(const int x, const int y);
     void show();
     void clear();
     const int width() const;
