@@ -1,10 +1,9 @@
 #include "AdaNeoDisplay.h"
 
-AdaNeoDisplay::AdaNeoDisplay(int size_x, int size_y, int pin) : size_x(size_x), size_y(size_y), pin(pin)
+AdaNeoDisplay::AdaNeoDisplay(Adafruit_NeoPixel &display, const int size_x, const int size_y) : 
+    display(display), size_x(size_x), size_y(size_y)
 {
     numpixels = size_x * size_y;
-    pixels = Adafruit_NeoPixel(numpixels, pin, NEO_GRB + NEO_KHZ800);
-    pixels.begin();
 }
 
 AdaNeoDisplay::~AdaNeoDisplay()
@@ -24,7 +23,7 @@ void AdaNeoDisplay::setPixel(int x, int y, RGB value)
     {
         line_offset = (((size_x-1) - x) * size_y) + (size_y-1) - y;
     }
-    pixels.setPixelColor(line_offset, pixels.Color(value.red, value.green, value.blue));
+    display.setPixelColor(line_offset, display.Color(value.red, value.green, value.blue));
 }
 
 void AdaNeoDisplay::delPixel(const int x, const int y)
@@ -32,16 +31,21 @@ void AdaNeoDisplay::delPixel(const int x, const int y)
     setPixel( x, y, {0,0,0});
 }
 
+void AdaNeoDisplay::start()
+{
+    display.begin();
+}
+
 void AdaNeoDisplay::show()
 {
-    pixels.show();
+    display.show();
 }
 
 void AdaNeoDisplay::clear()
 {
     for (int pixel = 0; pixel < numpixels; pixel++)
     {
-        pixels.setPixelColor(pixel, pixels.Color(0, 0, 0));
+        display.setPixelColor(pixel, display.Color(0, 0, 0));
     }
     this->show();
 }
@@ -55,3 +59,4 @@ const int AdaNeoDisplay::height() const
 {
     return size_y;
 }
+

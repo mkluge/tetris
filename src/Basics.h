@@ -1,5 +1,5 @@
-#ifndef BASICS_H
-#define BASICS_H
+#ifndef BASIC_H
+#define BASIC_H
 
 #include <tuple>
 
@@ -22,6 +22,17 @@ struct Pixel {
     int x;
     int y;
     RGB color;
+};
+bool operator==(const Pixel &lhs, const Pixel &rhs);
+
+struct Keys
+{
+    bool left_push;
+    bool right_push;
+    bool left_joy;
+    bool up_joy;
+    bool right_joy;
+    bool down_joy;
 };
 
 #endif

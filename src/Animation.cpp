@@ -89,7 +89,7 @@ void Animation::moveInside()
     }
 }
 
-Rect Animation::boundingBox()
+const Rect Animation::boundingBox() const
 {
     struct Rect retval = {display.width(), display.height(), 0, 0};
     for (auto &pixel : pixels)
@@ -114,7 +114,7 @@ Rect Animation::boundingBox()
     return retval;
 }
 
-void Animation::paint()
+void Animation::paint() const
 {
     for (auto &pixel : pixels)
     {
@@ -123,6 +123,28 @@ void Animation::paint()
                          pixel.color);
     }
 }
+
+void Animation::addPixels(const PixelList &toadd)
+{
+    for( auto pixel: toadd)
+    {
+        pixels.push_back(pixel);
+    }    
+}
+
+void Animation::removePixels(const PixelList &toremove)
+{
+    for (const auto pixel : toremove)
+    {
+        pixels.remove(pixel);
+    }
+}
+
+const Animation::PixelList &Animation::getPixels()
+{
+    return pixels;
+}
+
 /**
  * all lines bigger than the selected one is moved one up
  */

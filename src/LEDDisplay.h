@@ -10,6 +10,7 @@ class LEDDisplay
 public:
     virtual void setPixel(const int x, const int y, RGB value) = 0;
     virtual void delPixel(const int x, const int y) = 0;
+    virtual void start() = 0;
     virtual void show() = 0;
     virtual void clear() = 0;
     virtual const int width() const = 0;

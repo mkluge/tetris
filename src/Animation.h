@@ -6,10 +6,10 @@
 #include <list>
 
 #pragma once
-
 class Animation
 {
 public:
+    typedef std::list<Pixel> PixelList;
     enum Rotation
     {
         LEFT,
@@ -21,14 +21,18 @@ public:
     virtual void translate(int x, int y, bool keepInside = false);
     virtual void setColor(unsigned short red, unsigned short green, unsigned short blue);
     virtual void moveInside();
-    virtual Rect boundingBox();
-    virtual void paint();
+    virtual const Rect boundingBox() const;
+    virtual void paint() const;
+    virtual void addPixels(const PixelList &toadd);
+    virtual void removePixels(const PixelList &toremove);
+    virtual const PixelList &getPixels();
+    virtual void step() = 0;
     // for Tetris
-    virtual void removeLine(int line);
+    void removeLine(int line);
 
 protected:
     LEDDisplay &display;
-    std::list<Pixel> pixels;
+    PixelList pixels;
 };
 
 #endif
