@@ -1,22 +1,22 @@
-
-#include "TetrisGame.h"
+#include <TetrisGame.h>
+#include <PointAnimation.h>
 
 TetrisGame::TetrisGame(LEDDisplay &display, int width, int height) :
     display(display),
     width(width),
     height(height)
 {
-    
+    floor = new Animation(display);
+    falling = new PointAnimation(display, 4, 11);
 }
 
 TetrisGame::~TetrisGame()
-{
-    
+{   
 }
 
 void TetrisGame::animate(Keys &keys)
 {
-    
+    falling->translate(0, -1);   
 }
 
 /**

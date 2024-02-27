@@ -40,6 +40,7 @@ void Animation::translate(int move_x, int move_y, bool keepInside)
 {
     for (auto &pixel : pixels)
     {
+        display.setPixel( x, y, {0,0,0});
         pixel.x += move_x;
         pixel.y += move_y;
     }
@@ -157,7 +158,6 @@ void Animation::removeLine(int line)
         {
             new_pixels.push_back(pixel);
         }
-        // all ==line pixels are removed
         else if (pixel.y > line)
         {
             pixel.y--;

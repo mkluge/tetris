@@ -26,7 +26,6 @@ public:
     virtual void addPixels(const PixelList &toadd);
     virtual void removePixels(const PixelList &toremove);
     virtual const PixelList &getPixels();
-    virtual void step() = 0;
     // for Tetris
     void removeLine(int line);
 

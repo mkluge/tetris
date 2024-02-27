@@ -21,7 +21,8 @@ private:
     LEDDisplay &display;
     int width;
     int height;
-    std::list<std::reference_wrapper<Animation>> animations;
+    Animation *falling;
+    Animation *floor;
 };
 
 #endif
