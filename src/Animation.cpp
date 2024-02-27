@@ -40,7 +40,7 @@ void Animation::translate(int move_x, int move_y, bool keepInside)
 {
     for (auto &pixel : pixels)
     {
-        display.setPixel( x, y, {0,0,0});
+        display.setPixel( pixel.x, pixel.y, {0,0,0});
         pixel.x += move_x;
         pixel.y += move_y;
     }
