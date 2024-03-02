@@ -19,9 +19,9 @@ public:
     key_state_map_t toggled();
 
 private:
-    static key_map_t keys;
-    static key_state_map_t old_state;
-    static key_state_map_t toggled_keys;
+    inline static key_map_t keys;
+    inline static key_state_map_t old_state;
+    inline static key_state_map_t toggled_keys;
 };
 
 #endif
