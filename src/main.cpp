@@ -8,8 +8,8 @@
 // Module connection pins (Digital Pins)
 #define CLK_LEFT_LED 27
 #define DIO_LEFT_LED 26
-#define CLK_RIGHT_LED 33
-#define DIO_RIGHT_LED 32
+#define CLK_RIGHT_LED 25
+#define DIO_RIGHT_LED 33
 
 TM1637Display l8_left(CLK_LEFT_LED, DIO_LEFT_LED);
 TM1637Display l8_right(CLK_RIGHT_LED, DIO_RIGHT_LED);
@@ -39,7 +39,7 @@ void IRAM_ATTR isr()
 }
 
 // input pins
-#define DISPLAY_PIN 14
+#define DISPLAY_PIN 32
 #define L_JOYSTICK_PIN 22
 #define R_JOYSTICK_PIN 23
 #define U_JOYSTICK_PIN 15
@@ -85,7 +85,7 @@ void tetrisThread();
 void leftLEDThread();
 Scheduler runner;
 Task tetrisTask(1000, TASK_FOREVER, &tetrisThread);
-Task lefLedTask(1000, TASK_FOREVER, &leftLEDThread);
+Task leftLedTask(1000, TASK_FOREVER, &leftLEDThread);
 
 void leftLEDThread()
 {
@@ -115,39 +115,39 @@ void initPins()
 
 void setup()
 {
+  initPins();
   display.start();
   randomSeed(analogRead(0)); // Seed the random number generator with an analog reading
-    initPins();
-    digitalWrite(BUTTON_LEFT_LED, 1);
-    digitalWrite(BUTTON_RIGHT_LED, 1);
-    /*
-    l8_left.clear();
-    l8_right.clear();
-    l8_right.showNumberDec(1234);
-    runner.addTask(lefLedTask);
-    pinMode(button1.PIN, INPUT_PULLUP);
-    attachInterrupt(button1.PIN, isr, FALLING);
- */
-    Serial.begin(115200);
-    Serial.write("Goo");
-    runner.addTask(tetrisTask);
-  }
+  //digitalWrite(BUTTON_LEFT_LED, 1);
+                             //   digitalWrite(BUTTON_RIGHT_LED, 1);
+  
+  l8_left.clear();
+  l8_right.clear();
+  l8_right.showNumberDec(1234);
+  runner.addTask(leftLedTask);
+ /* pinMode(button1.PIN, INPUT_PULLUP);
+  attachInterrupt(button1.PIN, isr, FALLING);
+*/
+  //  Serial.begin(115200);
+  //  Serial.write("Goo");
+  // runner.addTask(tetrisTask);
+}
 
-  /**
-   * updates keys and sets a new status if the input
-   * is different from the known old state that was used
-   * during the last animation sequence
-   * thus: the anmiation task has to copy current_key_state
-   *       to old_key_state after the animation
-   */
-  void readKeys()
-  {
-    KEY_UPDATE(L_JOYSTICK_PIN, left_joy);
-    KEY_UPDATE(R_JOYSTICK_PIN, right_joy);
-    KEY_UPDATE(U_JOYSTICK_PIN, up_joy);
-    KEY_UPDATE(D_JOYSTICK_PIN, down_joy);
-    KEY_UPDATE(L_PUSH_PIN, left_push);
-    KEY_UPDATE(R_PUSH_PIN, right_push);
+/**
+ * updates keys and sets a new status if the input
+ * is different from the known old state that was used
+ * during the last animation sequence
+ * thus: the anmiation task has to copy current_key_state
+ *       to old_key_state after the animation
+ */
+void readKeys()
+{
+  KEY_UPDATE(L_JOYSTICK_PIN, left_joy);
+  KEY_UPDATE(R_JOYSTICK_PIN, right_joy);
+  KEY_UPDATE(U_JOYSTICK_PIN, up_joy);
+  KEY_UPDATE(D_JOYSTICK_PIN, down_joy);
+  KEY_UPDATE(L_PUSH_PIN, left_push);
+  KEY_UPDATE(R_PUSH_PIN, right_push);
 }
 
 void loop()
@@ -161,7 +161,11 @@ void loop()
   }
   */
   // first: update the key status
-//  readKeys();
+  //  readKeys();
+
   // the run all animations
+  display.setPixel(1, 1, {125, 255, 230});
+  display.show();
+  // Serial.print("ball");
   runner.execute();
 }
