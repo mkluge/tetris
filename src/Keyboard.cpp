@@ -16,7 +16,8 @@ void IRAM_ATTR Keyboard::isr()
         bool pressed = digitalRead(kv.second);
         if (pressed != old_state[kv.first])    
         {
-            toggled_keys[kv.first]=pressed;
+            // we are running low active
+            toggled_keys[kv.first]=!pressed;
         }                                      
     }
 }
@@ -45,7 +46,8 @@ Keyboard::key_state_map_t Keyboard::toggled()
     {
         old_state[kv.first] = digitalRead(kv.second);
     }
-    auto retval = toggled_keys;
+    // negate all values as we are running low active
+    key_state_map_t retval = toggled_keys;
     toggled_keys.clear();
     return retval;
 }
