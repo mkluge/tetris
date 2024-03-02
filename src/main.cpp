@@ -117,47 +117,51 @@ void setup()
 {
   display.start();
   randomSeed(analogRead(0)); // Seed the random number generator with an analog reading
-  initPins();
-  l8_left.clear();
-  l8_right.clear();
-  l8_right.showNumberDec(1234);
-  runner.addTask(tetrisTask);
-  runner.addTask(lefLedTask);
-  //  Serial.begin(115200);
-  digitalWrite(BUTTON_LEFT_LED,1);
-  digitalWrite(BUTTON_RIGHT_LED,1);
-  pinMode(button1.PIN, INPUT_PULLUP);
-  attachInterrupt(button1.PIN, isr, FALLING);
-}
-
-/**
- * updates keys and sets a new status if the input
- * is different from the known old state that was used
- * during the last animation sequence
- * thus: the anmiation task has to copy current_key_state
- *       to old_key_state after the animation
+    initPins();
+    digitalWrite(BUTTON_LEFT_LED, 1);
+    digitalWrite(BUTTON_RIGHT_LED, 1);
+    /*
+    l8_left.clear();
+    l8_right.clear();
+    l8_right.showNumberDec(1234);
+    runner.addTask(lefLedTask);
+    pinMode(button1.PIN, INPUT_PULLUP);
+    attachInterrupt(button1.PIN, isr, FALLING);
  */
-void readKeys()
-{
-  KEY_UPDATE(L_JOYSTICK_PIN, left_joy);
-  KEY_UPDATE(R_JOYSTICK_PIN, right_joy);
-  KEY_UPDATE(U_JOYSTICK_PIN, up_joy);
-  KEY_UPDATE(D_JOYSTICK_PIN, down_joy);
-  KEY_UPDATE(L_PUSH_PIN, left_push);
-  KEY_UPDATE(R_PUSH_PIN, right_push);
+    Serial.begin(115200);
+    Serial.write("Goo");
+    runner.addTask(tetrisTask);
+  }
+
+  /**
+   * updates keys and sets a new status if the input
+   * is different from the known old state that was used
+   * during the last animation sequence
+   * thus: the anmiation task has to copy current_key_state
+   *       to old_key_state after the animation
+   */
+  void readKeys()
+  {
+    KEY_UPDATE(L_JOYSTICK_PIN, left_joy);
+    KEY_UPDATE(R_JOYSTICK_PIN, right_joy);
+    KEY_UPDATE(U_JOYSTICK_PIN, up_joy);
+    KEY_UPDATE(D_JOYSTICK_PIN, down_joy);
+    KEY_UPDATE(L_PUSH_PIN, left_push);
+    KEY_UPDATE(R_PUSH_PIN, right_push);
 }
 
 void loop()
 {
-  static int num_pressed = 0;
+  /* static int num_pressed = 0;
   if (button1.pressed)
   {
     num_pressed++;
     l8_right.showNumberDec(num_pressed);
     button1.pressed = false;
   }
+  */
   // first: update the key status
-  readKeys();
+//  readKeys();
   // the run all animations
   runner.execute();
 }
