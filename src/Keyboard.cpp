@@ -32,6 +32,7 @@ void Keyboard::addKey(int id, int pin)
 
 Keyboard::key_state_map_t Keyboard::toggled()
 {
+    noInterrupts();
     // run again to check state
     for (auto const &kv : keys)
     {
@@ -49,6 +50,7 @@ Keyboard::key_state_map_t Keyboard::toggled()
     // negate all values as we are running low active
     key_state_map_t retval = toggled_keys;
     toggled_keys.clear();
+    interrupts();
     return retval;
 }
 
