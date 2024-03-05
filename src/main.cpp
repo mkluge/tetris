@@ -4,6 +4,7 @@
 #include <TetrisGame.h>
 #include <TaskScheduler.h>
 #include <TM1637Display.h>
+#include <Keyboard.h>
 
 // Module connection pins (Digital Pins)
 #define CLK_LEFT_LED 27
@@ -11,41 +12,14 @@
 #define CLK_RIGHT_LED 25
 #define DIO_RIGHT_LED 33
 
-TM1637Display l8_left(CLK_LEFT_LED, DIO_LEFT_LED);
-TM1637Display l8_right(CLK_RIGHT_LED, DIO_RIGHT_LED);
-
-struct Button
-{
-  const uint8_t PIN;
-  uint32_t numberKeyPresses;
-  bool pressed;
-};
-
-Button button1 = {22, 0, false};
-
-// variables to keep track of the timing of recent interrupts
-unsigned long button_time = 0;
-unsigned long last_button_time = 0;
-
-void IRAM_ATTR isr()
-{
-  button_time = millis();
-  if (button_time - last_button_time > 250)
-  {
-    button1.numberKeyPresses++;
-    button1.pressed = true;
-    last_button_time = button_time;
-  }
-}
-
 // input pins
 #define DISPLAY_PIN 32
-#define L_JOYSTICK_PIN 22
-#define R_JOYSTICK_PIN 23
-#define U_JOYSTICK_PIN 15
-#define D_JOYSTICK_PIN 2
-#define L_PUSH_PIN 4
-#define R_PUSH_PIN 16
+#define D_JOYSTICK_PIN 3
+#define R_JOYSTICK_PIN 21
+#define U_JOYSTICK_PIN 19
+#define L_JOYSTICK_PIN 18
+#define R_PUSH_PIN 22
+#define L_PUSH_PIN 23
 #define BUTTON_LEFT_LED 1
 #define BUTTON_RIGHT_LED 17
 
@@ -62,14 +36,6 @@ std::list<uint8_t> output_pins = {
     BUTTON_LEFT_LED,
     BUTTON_RIGHT_LED,
 };
-#define KEY_UPDATE(pin, field)           \
-  {                                      \
-    bool pressed = digitalRead(pin);     \
-    if (pressed != old_key_state.field)  \
-    {                                    \
-      current_key_state.field = pressed; \
-    }                                    \
-  }
 
 #define PIXELS_X 8
 #define PIXELS_Y 12
@@ -77,14 +43,14 @@ std::list<uint8_t> output_pins = {
 auto native_display = Adafruit_NeoPixel(PIXELS_X * PIXELS_Y, DISPLAY_PIN, NEO_GRB + NEO_KHZ800);
 AdaNeoDisplay display = AdaNeoDisplay(native_display, PIXELS_X, PIXELS_Y);
 TetrisGame tetris = TetrisGame(display, PIXELS_X, PIXELS_Y);
+TM1637Display l8_left(CLK_LEFT_LED, DIO_LEFT_LED);
+TM1637Display l8_right(CLK_RIGHT_LED, DIO_RIGHT_LED);
+Keyboard keyboard = Keyboard();
 
-Keys old_key_state;
-Keys current_key_state;
-
-void tetrisThread();
+void blinkThread();
 void leftLEDThread();
 Scheduler runner;
-Task tetrisTask(1000, TASK_FOREVER, &tetrisThread);
+Task blinkTask(1000, TASK_FOREVER, &blinkThread);
 Task leftLedTask(1000, TASK_FOREVER, &leftLEDThread);
 
 void leftLEDThread()
@@ -94,78 +60,61 @@ void leftLEDThread()
   counter++;
 }
 
-void tetrisThread()
+void blinkThread()
 {
-  tetris.animate(current_key_state);
-  display.show();
-  old_key_state = current_key_state;
+  static int lr = false;
+  digitalWrite(BUTTON_LEFT_LED, lr ? 0 : 1);
+  digitalWrite(BUTTON_RIGHT_LED, lr ? 1 : 0);
+  lr = !lr;
 }
 
-void initPins()
-{
-  for (auto pin : input_pins)
-  {
-    pinMode(pin, INPUT_PULLUP);
-  }
-  for (auto pin : output_pins)
-  {
-    pinMode(pin, OUTPUT);
-  }
-}
 
 void setup()
 {
   initPins();
   display.start();
   randomSeed(analogRead(0)); // Seed the random number generator with an analog reading
-  //digitalWrite(BUTTON_LEFT_LED, 1);
-                             //   digitalWrite(BUTTON_RIGHT_LED, 1);
-  
   l8_left.clear();
+  l8_left.setBrightness(0x0f);
+  l8_left.showNumberDec(1234);
   l8_right.clear();
-  l8_right.showNumberDec(1234);
+  l8_right.setBrightness(0x0f);
+  runner.addTask(blinkTask);
   runner.addTask(leftLedTask);
- /* pinMode(button1.PIN, INPUT_PULLUP);
-  attachInterrupt(button1.PIN, isr, FALLING);
-*/
-  //  Serial.begin(115200);
-  //  Serial.write("Goo");
-  // runner.addTask(tetrisTask);
-}
-
-/**
- * updates keys and sets a new status if the input
- * is different from the known old state that was used
- * during the last animation sequence
- * thus: the anmiation task has to copy current_key_state
- *       to old_key_state after the animation
- */
-void readKeys()
-{
-  KEY_UPDATE(L_JOYSTICK_PIN, left_joy);
-  KEY_UPDATE(R_JOYSTICK_PIN, right_joy);
-  KEY_UPDATE(U_JOYSTICK_PIN, up_joy);
-  KEY_UPDATE(D_JOYSTICK_PIN, down_joy);
-  KEY_UPDATE(L_PUSH_PIN, left_push);
-  KEY_UPDATE(R_PUSH_PIN, right_push);
+  leftLedTask.enable();
+  blinkTask.enable();
+  for( const auto &key: input_pins)
+  {
+    keyboard.addKey( key, key);
+  }
+  display.clear();
+  pinMode(BUTTON_LEFT_LED, OUTPUT);
+  pinMode(BUTTON_RIGHT_LED, OUTPUT);
+  digitalWrite(BUTTON_LEFT_LED, 0);
+  digitalWrite(BUTTON_RIGHT_LED, 0);
 }
 
 void loop()
 {
-  /* static int num_pressed = 0;
-  if (button1.pressed)
-  {
-    num_pressed++;
-    l8_right.showNumberDec(num_pressed);
-    button1.pressed = false;
-  }
-  */
-  // first: update the key status
-  //  readKeys();
+  static int num_pressed = 0;
+  static bool ignore = true;
+  const auto &pressed = keyboard.toggled();
 
-  // the run all animations
-  display.setPixel(1, 1, {125, 255, 230});
-  display.show();
-  // Serial.print("ball");
+  if (pressed.size())
+  {
+    if(ignore)
+    {
+      ignore = false;
+      return;
+    }
+    num_pressed += pressed.size();
+    l8_right.showNumberDec(num_pressed);
+    for (auto cont : pressed)
+    {
+        display.setPixel(cont.first % 8, cont.first / 8, {255, 255, 255});
+    }
+    display.show();
+  }
+  // run all animations
   runner.execute();
 }
