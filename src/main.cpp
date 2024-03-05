@@ -12,15 +12,14 @@
 #define CLK_RIGHT_LED 25
 #define DIO_RIGHT_LED 33
 
-
 // input pins
 #define DISPLAY_PIN 32
-#define L_JOYSTICK_PIN 23
-#define R_JOYSTICK_PIN 22
-#define U_JOYSTICK_PIN 15
-#define D_JOYSTICK_PIN 2
-#define L_PUSH_PIN 4
-#define R_PUSH_PIN 16
+#define D_JOYSTICK_PIN 3
+#define R_JOYSTICK_PIN 21
+#define U_JOYSTICK_PIN 19
+#define L_JOYSTICK_PIN 18
+#define R_PUSH_PIN 22
+#define L_PUSH_PIN 23
 #define BUTTON_LEFT_LED 1
 #define BUTTON_RIGHT_LED 17
 
@@ -48,10 +47,10 @@ TM1637Display l8_left(CLK_LEFT_LED, DIO_LEFT_LED);
 TM1637Display l8_right(CLK_RIGHT_LED, DIO_RIGHT_LED);
 Keyboard keyboard = Keyboard();
 
-void tetrisThread();
+void blinkThread();
 void leftLEDThread();
 Scheduler runner;
-//Task tetrisTask(1000, TASK_FOREVER, &tetrisThread);
+Task blinkTask(1000, TASK_FOREVER, &blinkThread);
 Task leftLedTask(1000, TASK_FOREVER, &leftLEDThread);
 
 void leftLEDThread()
@@ -61,62 +60,60 @@ void leftLEDThread()
   counter++;
 }
 
-void tetrisThread()
+void blinkThread()
 {
-  //
-  //tetris.animate(current_key_state);
-  //display.show();
-  //old_key_state = current_key_state;
+  static int lr = false;
+  digitalWrite(BUTTON_LEFT_LED, lr ? 0 : 1);
+  digitalWrite(BUTTON_RIGHT_LED, lr ? 1 : 0);
+  lr = !lr;
 }
 
-void initPins()
-{
-  for (auto pin : output_pins)
-  {
-    pinMode(pin, OUTPUT);
-  }
-}
 
 void setup()
 {
   display.start();
   randomSeed(analogRead(0)); // Seed the random number generator with an analog reading
-  initPins();
   l8_left.clear();
   l8_left.setBrightness(0x0f);
   l8_left.showNumberDec(1234);
   l8_right.clear();
   l8_right.setBrightness(0x0f);
-//  runner.addTask(tetrisTask);
+  runner.addTask(blinkTask);
   runner.addTask(leftLedTask);
-  //  Serial.begin(115200);
-  digitalWrite(BUTTON_LEFT_LED,1);
-  digitalWrite(BUTTON_RIGHT_LED,1);
+  leftLedTask.enable();
+  blinkTask.enable();
   for( const auto &key: input_pins)
   {
     keyboard.addKey( key, key);
   }
+  display.clear();
+  pinMode(BUTTON_LEFT_LED, OUTPUT);
+  pinMode(BUTTON_RIGHT_LED, OUTPUT);
+  digitalWrite(BUTTON_LEFT_LED, 0);
+  digitalWrite(BUTTON_RIGHT_LED, 0);
 }
 
 void loop()
 {
   static int num_pressed = 0;
+  static bool ignore = true;
   const auto &pressed = keyboard.toggled();
+
   if (pressed.size())
   {
-    num_pressed++;
-    l8_right.showNumberDec(num_pressed);
-  }
-  for (auto x = 0; x < PIXELS_X; x++)
-  {
-    for (auto y = 0; y < PIXELS_Y; y++)
+    if(ignore)
     {
-      display.setPixel(x, y, {255, 255, 255});
-//      display.show();
+      ignore = false;
+      return;
     }
+    num_pressed += pressed.size();
+    l8_right.showNumberDec(num_pressed);
+    for (auto cont : pressed)
+    {
+        display.setPixel(cont.first % 8, cont.first / 8, {255, 255, 255});
+    }
+    display.show();
   }
-  display.setPixel(1, 1, {1, 255, 255});
-  display.show();
-  // the run all animations
+  // run all animations
   runner.execute();
 }
