@@ -5,6 +5,7 @@
 #include <TaskScheduler.h>
 #include <TM1637Display.h>
 #include <Keyboard.h>
+#include <SteinScherePapier.h>
 
 // Module connection pins (Digital Pins)
 #define CLK_LEFT_LED 27
@@ -46,12 +47,18 @@ TetrisGame tetris = TetrisGame(display, PIXELS_X, PIXELS_Y);
 TM1637Display l8_left(CLK_LEFT_LED, DIO_LEFT_LED);
 TM1637Display l8_right(CLK_RIGHT_LED, DIO_RIGHT_LED);
 Keyboard keyboard = Keyboard();
+SteinScherePapier<PIXELS_X,PIXELS_Y> ssp(display);
 
-void blinkThread();
+void sspThread();
 void leftLEDThread();
 Scheduler runner;
-Task blinkTask(1000, TASK_FOREVER, &blinkThread);
+Task sspTask(1000, TASK_FOREVER, &sspThread);
 Task leftLedTask(1000, TASK_FOREVER, &leftLEDThread);
+
+void sspThread()
+{
+  ssp.animate();
+}
 
 void leftLEDThread()
 {
@@ -78,10 +85,10 @@ void setup()
   l8_left.showNumberDec(1234);
   l8_right.clear();
   l8_right.setBrightness(0x0f);
-  runner.addTask(blinkTask);
+  runner.addTask(sspTask);
   runner.addTask(leftLedTask);
   leftLedTask.enable();
-  blinkTask.enable();
+  sspTask.enable();
   for( const auto &key: input_pins)
   {
     keyboard.addKey( key, key);
@@ -91,28 +98,15 @@ void setup()
   pinMode(BUTTON_RIGHT_LED, OUTPUT);
   digitalWrite(BUTTON_LEFT_LED, 0);
   digitalWrite(BUTTON_RIGHT_LED, 0);
+  ssp.init();
 }
 
 void loop()
 {
-  static int num_pressed = 0;
-  static bool ignore = true;
   const auto &pressed = keyboard.toggled();
-
   if (pressed.size())
   {
-    if(ignore)
-    {
-      ignore = false;
-      return;
-    }
-    num_pressed += pressed.size();
-    l8_right.showNumberDec(num_pressed);
-    for (auto cont : pressed)
-    {
-        display.setPixel(cont.first % 8, cont.first / 8, {255, 255, 255});
-    }
-    display.show();
+    ssp.init();
   }
   // run all animations
   runner.execute();
