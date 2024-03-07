@@ -72,11 +72,16 @@ public:
                 // has win_state a count of at least 2?
                 if( neig_count[win_state] >=2 )
                 {
-                    state[x][y] = win_state;
+                    new_state[x][y] = win_state;
+                }
+                else
+                {
+                    new_state[x][y] = state[x][y];
                 }
                 // if not, old state just stays
             }
         }
+        state = new_state;
         paint();
     }
 
@@ -95,11 +100,13 @@ public:
                 display.setPixel(x, y, color);
             }
         }
+        display.show();
     }
 
 private:
     LEDDisplay &display;
     std::array<std::array<short, size_y>, size_x> state;
+    std::array<std::array<short, size_y>, size_x> new_state;
 };
 
 #endif
