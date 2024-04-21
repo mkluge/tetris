@@ -23,6 +23,10 @@ public:
 
     void init()
     {
+        x_start = -2.0;
+        x_fin = 1.0;
+        y_start = -1.0;
+        y_fin = 1.0;
     };
 
     int mandelbrot(double real, double imag)
@@ -101,10 +105,7 @@ public:
 
 private:
     LEDDisplay &display;
-    double x_start = -2.0;
-    double x_fin = 1.0;
-    double y_start = -1.0;
-    double y_fin = 1.0;
+    double x_start, x_fin, y_start, y_fin;
 };
 
 #endif

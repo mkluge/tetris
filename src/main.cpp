@@ -7,6 +7,7 @@
 #include <Keyboard.h>
 #include <SteinScherePapier.h>
 #include <Mandelbrot.h>
+#include <Plasma.h>
 
 // Module connection pins (Digital Pins)
 #define CLK_LEFT_LED 27
@@ -50,27 +51,26 @@ TM1637Display l8_right(CLK_RIGHT_LED, DIO_RIGHT_LED);
 Keyboard keyboard = Keyboard();
 SteinScherePapier<PIXELS_X, PIXELS_Y> ssp(display);
 Mandelbrot<PIXELS_X, PIXELS_Y> mandelbrot(display);
+Plasma<PIXELS_X, PIXELS_Y> plasma(display);
+
+#define ANIMATION plasma
 
 void sspThread();
-void mandelbrotThread();
+void animationThread();
 void leftLEDThread();
 Scheduler runner;
-Task animationTask(30, TASK_FOREVER, &mandelbrotThread);
-Task leftLedTask(30, TASK_FOREVER, &leftLEDThread);
+Task animationTask(10, TASK_FOREVER, &animationThread);
+Task leftLedTask(10, TASK_FOREVER, &leftLEDThread);
 
-void sspThread()
-{
-  ssp.animate();
-}
+int counter = 0;
 
-void mandelbrotThread()
+void animationThread()
 {
-  mandelbrot.paint();
+  ANIMATION.paint();
 }
 
 void leftLEDThread()
 {
-  static int counter = 0;
   l8_left.showNumberDec(counter);
   counter++;
 }
@@ -106,8 +106,7 @@ void setup()
   pinMode(BUTTON_RIGHT_LED, OUTPUT);
   digitalWrite(BUTTON_LEFT_LED, 0);
   digitalWrite(BUTTON_RIGHT_LED, 0);
-  ssp.init();
-  mandelbrot.init();
+  ANIMATION.init();
 }
 
 void loop()
@@ -115,7 +114,8 @@ void loop()
   const auto &pressed = keyboard.toggled();
   if (pressed.size())
   {
-    ssp.init();
+    ANIMATION.init();
+    counter=0;
   }
   // run all animations
   runner.execute();
