@@ -23,12 +23,27 @@ public:
 
     void init()
     {
-        t1 = millis();
-        t2 = millis();
-
-        cX = cR + t1;
-        cY = cI + (t1 / 2.5);
     };
+
+    int mandelbrot(double real, double imag)
+    {
+        int limit = 100;
+        double zReal = real;
+        double zImag = imag;
+
+        for (int i = 0; i < limit; ++i)
+        {
+            double r2 = zReal * zReal;
+            double i2 = zImag * zImag;
+
+            if (r2 + i2 > 4.0)
+                return i;
+
+            zImag = 2.0 * zReal * zImag + imag;
+            zReal = r2 - i2 + real;
+        }
+        return limit;
+    }
 
     RGB render2D(int x, int y)
     {
@@ -61,23 +76,35 @@ public:
 
     void paint()
     {
+        double dx = (x_fin - x_start) / (size_x - 1);
+        double dy = (y_fin - y_start) / (size_y - 1);
+
         for (auto x = 0; x < size_x; x++)
         {
             for (auto y = 0; y < size_y; y++)
             {
-                auto color = render2D(x, y);
-                display.setPixel(x, y, color);
+                double rx = x_start + x * dx; // current real value
+                double ry = y_fin - y * dy;   // current imaginary value
+
+                int value = mandelbrot(rx, ry);
+                display.setPixel(x,y,ZeroOneToRainbow((double)value/100.0));
+                if(value==100)
+                {
+                    display.setPixel(x,y,{0,0,0});
+                }
             }
         }
         display.show();
+        x_start /= 1.01;
+        y_start /= 1.01;
     }
 
 private:
     LEDDisplay &display;
-    int maxIterations = 15;
-    double t1, t2, cX, cY;
-    double cR = -0.94299;
-    double cI = 0.3162;
+    double x_start = -2.0;
+    double x_fin = 1.0;
+    double y_start = -1.0;
+    double y_fin = 1.0;
 };
 
 #endif

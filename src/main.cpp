@@ -55,8 +55,8 @@ void sspThread();
 void mandelbrotThread();
 void leftLEDThread();
 Scheduler runner;
-Task animationTask(100, TASK_FOREVER, &mandelbrotThread);
-Task leftLedTask(100, TASK_FOREVER, &leftLEDThread);
+Task animationTask(30, TASK_FOREVER, &mandelbrotThread);
+Task leftLedTask(30, TASK_FOREVER, &leftLEDThread);
 
 void sspThread()
 {
