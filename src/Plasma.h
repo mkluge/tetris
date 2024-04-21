@@ -5,8 +5,8 @@
 #include <LEDDisplay.h>
 #include <array>
 #include <map>
+#include <FastTrig.h>
 #include <math.h>
-
 #pragma once
 
 template <int size_x, int size_y>
@@ -43,6 +43,20 @@ public:
         b = int(128 + 127 * sin(PI * (v + 4.188)));
         return {r,g,b};
     }
+
+    // Function to calculate plasma color for a given pixel
+    RGB calculatePlasmaColor2(int x, int y, int time)
+    {
+        unsigned short r, g, b;
+        time = time % 180;
+        // scale x and y so that they move between 0 and 180
+        int v = isin(time+isin(x*10)+isin(y*10));
+        r = int(128 + 127 * isin(v));
+        g = int(128 + 127 * isin(v + 120));
+        b = int(128 + 127 * isin(v + 240));
+        return {r, g, b};
+    }
+
     void paint()
     {
         for (auto x = 0; x < size_x; x++)
