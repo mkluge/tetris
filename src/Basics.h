@@ -35,4 +35,6 @@ struct Keys
     bool down_joy;
 };
 
+RGB ZeroOneToRainbow(double f);
+
 #endif

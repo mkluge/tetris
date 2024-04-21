@@ -28,16 +28,19 @@ public:
     };
 
     // Function to calculate plasma color for a given pixel
-    RGB calculatePlasmaColor(int x, int y, int time)
+    RGB calculatePlasmaColor(int x, int y, int time, double direction)
     {
         unsigned short r, g, b;
-        double t = time * 0.05; // Time parameter for animation
-        double v = sin(x * 0.3 + t) + sin(y * 0.4 + t) + sin((x + y) * 0.5 + t) +
-                   sin(sqrt(double(x * x + y * y)) * 0.7 + t);
-                   sin(sqrt(double(x * x + y * y)) * 0.7 + t);
-        r = (unsigned int)(128 + 127 * sin(PI * (v)));
-        g = (unsigned int)(128 + 127 * sin(PI * (v + 2.094)));
-        b = (unsigned int)(128 + 127 * sin(PI * (v + 4.188)));
+        double t = time * 0.05;             // Time parameter for animation
+        double dx = speed * cos(direction); // Calculate horizontal movement
+        double dy = speed * sin(direction); // Calculate vertical movement
+        double v = sin((x + dx) * 0.3 + (y + dy) * 0.2 + t) +
+                   sin((x + dx) * 0.4 + (y + dy) * 0.3 + t) +
+                   sin((x + dx + y + dy) * 0.5 + t) +
+                   sin(sqrt(double((x + dx) * (x + dx) + (y + dy) * (y + dy))) * 0.7 + t);
+        r = int(128 + 127 * sin(PI * v));
+        g = int(128 + 127 * sin(PI * (v + 2.094)));
+        b = int(128 + 127 * sin(PI * (v + 4.188)));
         return {r,g,b};
     }
     void paint()
@@ -46,7 +49,7 @@ public:
         {
             for (auto y = 0; y < size_y; y++)
             {
-                display.setPixel(x, y, calculatePlasmaColor(x, y, plasma_time));
+                display.setPixel(x, y, calculatePlasmaColor(x, y, plasma_time, 0.5));
             }
         }
         display.show();
