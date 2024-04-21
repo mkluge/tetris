@@ -6,6 +6,7 @@
 #include <TM1637Display.h>
 #include <Keyboard.h>
 #include <SteinScherePapier.h>
+#include <Mandelbrot.h>
 
 // Module connection pins (Digital Pins)
 #define CLK_LEFT_LED 27
@@ -47,17 +48,24 @@ TetrisGame tetris = TetrisGame(display, PIXELS_X, PIXELS_Y);
 TM1637Display l8_left(CLK_LEFT_LED, DIO_LEFT_LED);
 TM1637Display l8_right(CLK_RIGHT_LED, DIO_RIGHT_LED);
 Keyboard keyboard = Keyboard();
-SteinScherePapier<PIXELS_X,PIXELS_Y> ssp(display);
+SteinScherePapier<PIXELS_X, PIXELS_Y> ssp(display);
+Mandelbrot<PIXELS_X, PIXELS_Y> mandelbrot(display);
 
 void sspThread();
+void mandelbrotThread();
 void leftLEDThread();
 Scheduler runner;
-Task sspTask(1000, TASK_FOREVER, &sspThread);
-Task leftLedTask(1000, TASK_FOREVER, &leftLEDThread);
+Task animationTask(100, TASK_FOREVER, &mandelbrotThread);
+Task leftLedTask(100, TASK_FOREVER, &leftLEDThread);
 
 void sspThread()
 {
   ssp.animate();
+}
+
+void mandelbrotThread()
+{
+  mandelbrot.paint();
 }
 
 void leftLEDThread()
@@ -85,10 +93,10 @@ void setup()
   l8_left.showNumberDec(1234);
   l8_right.clear();
   l8_right.setBrightness(0x0f);
-  runner.addTask(sspTask);
+  runner.addTask(animationTask);
   runner.addTask(leftLedTask);
   leftLedTask.enable();
-  sspTask.enable();
+  animationTask.enable();
   for( const auto &key: input_pins)
   {
     keyboard.addKey( key, key);
@@ -99,6 +107,7 @@ void setup()
   digitalWrite(BUTTON_LEFT_LED, 0);
   digitalWrite(BUTTON_RIGHT_LED, 0);
   ssp.init();
+  mandelbrot.init();
 }
 
 void loop()
