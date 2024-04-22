@@ -24,7 +24,7 @@ public:
     void init()
     {
         plasma_time = 1;
-        speed = 1;
+        speed = 10;
     };
 
     // Function to calculate plasma color for a given pixel
@@ -48,9 +48,8 @@ public:
     RGB calculatePlasmaColor2(int x, int y, int time)
     {
         unsigned short r, g, b;
-        time = time % 180;
         // scale x and y so that they move between 0 and 180
-        int v = isin(time+isin(x*10)+isin(y*10));
+        double v = isin256(x*x) + isin256(y*y) + isin(x+y) + (time%360);
         r = int(128 + 127 * isin(v));
         g = int(128 + 127 * isin(v + 120));
         b = int(128 + 127 * isin(v + 240));
@@ -63,7 +62,7 @@ public:
         {
             for (auto y = 0; y < size_y; y++)
             {
-                display.setPixel(x, y, calculatePlasmaColor(x, y, plasma_time, 0.5));
+                display.setPixel(x, y, calculatePlasmaColor2(x, y, plasma_time));
             }
         }
         display.show();
