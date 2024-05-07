@@ -43,7 +43,8 @@ void Keyboard::addKey(int id, int pin)
 Keyboard::key_state_map_t Keyboard::toggled()
 {
 //    noInterrupts();
-    // run again to check state
+    // run again to check state and report any
+    // differences
     for (auto const &kv : keys)
     {
         bool pressed = digitalRead(kv.second);
