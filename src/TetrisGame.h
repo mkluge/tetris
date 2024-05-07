@@ -5,6 +5,8 @@
 #include <functional>
 #include <Animation.h>
 #include <LEDDisplay.h>
+#include <Keyboard.h>
+
 
 #pragma once
 
@@ -14,7 +16,7 @@ public:
     TetrisGame(LEDDisplay &display, int width, int height);
     ~TetrisGame();
 
-    void animate(Keys &keys);
+    void animate(const Keyboard::key_state_map_t &keys);
     bool isOnTop( Animation &top, Animation &bottom);
 
 private:

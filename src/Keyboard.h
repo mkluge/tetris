@@ -6,11 +6,12 @@
 #include <map>
 #include <Arduino.h>
 
+
 class Keyboard
 {
 public:
     typedef std::map<int, int> key_map_t;
-    typedef std::map<int, bool> key_state_map_t;
+    typedef std::map<int, int> key_state_map_t;
     Keyboard();
     ~Keyboard();
 

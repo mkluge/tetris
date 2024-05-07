@@ -5,6 +5,16 @@
 
 #pragma once
 
+// input pins
+#define DISPLAY_PIN 32
+#define D_JOYSTICK_PIN 3
+#define R_JOYSTICK_PIN 21
+#define U_JOYSTICK_PIN 19
+#define L_JOYSTICK_PIN 18
+#define R_PUSH_PIN 22
+#define L_PUSH_PIN 23
+#define BUTTON_LEFT_LED 1
+#define BUTTON_RIGHT_LED 17
 struct Rect {
     int start_x;
     int start_y;
@@ -24,16 +34,6 @@ struct Pixel {
     RGB color;
 };
 bool operator==(const Pixel &lhs, const Pixel &rhs);
-
-struct Keys
-{
-    bool left_push;
-    bool right_push;
-    bool left_joy;
-    bool up_joy;
-    bool right_joy;
-    bool down_joy;
-};
 
 RGB ZeroOneToRainbow(double f);
 

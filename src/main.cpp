@@ -1,5 +1,6 @@
 #include <list>
 #include <Arduino.h>
+#include <Basics.h>
 #include <AdaNeoDisplay.h>
 #include <TetrisGame.h>
 #include <TaskScheduler.h>
@@ -14,17 +15,6 @@
 #define DIO_LEFT_LED 26
 #define CLK_RIGHT_LED 25
 #define DIO_RIGHT_LED 33
-
-// input pins
-#define DISPLAY_PIN 32
-#define D_JOYSTICK_PIN 3
-#define R_JOYSTICK_PIN 21
-#define U_JOYSTICK_PIN 19
-#define L_JOYSTICK_PIN 18
-#define R_PUSH_PIN 22
-#define L_PUSH_PIN 23
-#define BUTTON_LEFT_LED 1
-#define BUTTON_RIGHT_LED 17
 
 std::list<uint8_t> input_pins = {
     L_JOYSTICK_PIN,
@@ -53,20 +43,19 @@ SteinScherePapier<PIXELS_X, PIXELS_Y> ssp(display);
 Mandelbrot<PIXELS_X, PIXELS_Y> mandelbrot(display);
 Plasma<PIXELS_X, PIXELS_Y> plasma(display);
 
-#define ANIMATION plasma
-
 void sspThread();
-void animationThread();
 void leftLEDThread();
+void tetrisThread();
 Scheduler runner;
-Task animationTask(10, TASK_FOREVER, &animationThread);
 Task leftLedTask(10, TASK_FOREVER, &leftLEDThread);
+Task tetrisTask(500, TASK_FOREVER, &tetrisThread);
 
 int counter = 0;
 
-void animationThread()
+void tetrisThread()
 {
-  ANIMATION.paint();
+  const auto &pressed = keyboard.toggled();
+  tetris.animate(pressed);
 }
 
 void leftLEDThread()
@@ -83,7 +72,6 @@ void blinkThread()
   lr = !lr;
 }
 
-
 void setup()
 {
   display.start();
@@ -93,10 +81,10 @@ void setup()
   l8_left.showNumberDec(1234);
   l8_right.clear();
   l8_right.setBrightness(0x0f);
-  runner.addTask(animationTask);
   runner.addTask(leftLedTask);
-  leftLedTask.enable();
-  animationTask.enable();
+  runner.addTask(tetrisTask);
+  leftLedTask.disable();
+  tetrisTask.enable();
   for( const auto &key: input_pins)
   {
     keyboard.addKey( key, key);
@@ -106,17 +94,10 @@ void setup()
   pinMode(BUTTON_RIGHT_LED, OUTPUT);
   digitalWrite(BUTTON_LEFT_LED, 0);
   digitalWrite(BUTTON_RIGHT_LED, 0);
-  ANIMATION.init();
 }
 
 void loop()
 {
-  const auto &pressed = keyboard.toggled();
-  if (pressed.size())
-  {
-    ANIMATION.init();
-    counter=0;
-  }
   // run all animations
   runner.execute();
 }

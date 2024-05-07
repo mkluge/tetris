@@ -14,9 +14,45 @@ TetrisGame::~TetrisGame()
 {   
 }
 
-void TetrisGame::animate(Keys &keys)
+void TetrisGame::animate(const Keyboard::key_state_map_t &keys)
 {
-    falling->translate(0, -1);   
+    int x_translate = 0;
+    for( const auto &entry : keys) 
+    {
+        const int key = entry.first;
+        const int presses = entry.second;
+        if( key == L_JOYSTICK_PIN && presses>0 )
+        {
+            x_translate -= presses;
+        }
+        if( key == R_JOYSTICK_PIN && presses>0 )
+        {
+            x_translate += presses;
+        }
+    }
+    // remove old pixels
+    for( const auto &pixel : falling->getPixels())
+    {
+        display.delPixel(pixel.x, pixel.y);
+    }
+    if( falling->boundingBox().start_y == 0)
+    {
+        falling->setColor(100,200,50);
+        for( const auto &pixel : falling->getPixels())
+        {
+            display.setPixel(pixel.x, pixel.y, pixel.color);
+        }
+    }
+    else
+    {
+        falling->translate( x_translate, -1);
+        falling->moveInside();
+        for( const auto &pixel : falling->getPixels())
+        {
+            display.setPixel(pixel.x, pixel.y, pixel.color);
+        }
+    }
+    display.show();
 }
 
 /**
