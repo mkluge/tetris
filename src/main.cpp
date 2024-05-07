@@ -53,12 +53,21 @@ SteinScherePapier<PIXELS_X, PIXELS_Y> ssp(display);
 Mandelbrot<PIXELS_X, PIXELS_Y> mandelbrot(display);
 Plasma<PIXELS_X, PIXELS_Y> plasma(display);
 
+#include <Laufschrift.h>
+Laufschrift laufschrift(display);
+
 #define ANIMATION plasma
 
+Scheduler runner;
+
+void laufschriftRun() {
+  laufschrift.run();
+}
+Task laufschriftTask(30, TASK_FOREVER, &laufschriftRun);
+/*
 void sspThread();
 void animationThread();
 void leftLEDThread();
-Scheduler runner;
 Task animationTask(10, TASK_FOREVER, &animationThread);
 Task leftLedTask(10, TASK_FOREVER, &leftLEDThread);
 
@@ -72,6 +81,7 @@ void animationThread()
 void leftLEDThread()
 {
   l8_left.showNumberDec(counter);
+  l8_right.showNumberDec(counter);
   counter++;
 }
 
@@ -82,7 +92,7 @@ void blinkThread()
   digitalWrite(BUTTON_RIGHT_LED, lr ? 1 : 0);
   lr = !lr;
 }
-
+*/
 
 void setup()
 {
@@ -93,10 +103,15 @@ void setup()
   l8_left.showNumberDec(1234);
   l8_right.clear();
   l8_right.setBrightness(0x0f);
+
+  runner.addTask(laufschriftTask);
+  laufschriftTask.enable();
+  /*
   runner.addTask(animationTask);
   runner.addTask(leftLedTask);
   leftLedTask.enable();
   animationTask.enable();
+  */
   for( const auto &key: input_pins)
   {
     keyboard.addKey( key, key);
@@ -106,17 +121,18 @@ void setup()
   pinMode(BUTTON_RIGHT_LED, OUTPUT);
   digitalWrite(BUTTON_LEFT_LED, 0);
   digitalWrite(BUTTON_RIGHT_LED, 0);
-  ANIMATION.init();
+  //ANIMATION.init();
 }
 
 void loop()
 {
-  const auto &pressed = keyboard.toggled();
-  if (pressed.size())
-  {
-    ANIMATION.init();
-    counter=0;
-  }
+
+  // const auto &pressed = keyboard.toggled();
+  // if (pressed.size())
+  // {
+  //   ANIMATION.init();
+  //   counter=0;
+  // }
   // run all animations
   runner.execute();
 }
