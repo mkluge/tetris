@@ -45,18 +45,10 @@ Plasma<PIXELS_X, PIXELS_Y> plasma(display);
 
 void sspThread();
 void leftLEDThread();
-void tetrisThread();
 Scheduler runner;
 Task leftLedTask(10, TASK_FOREVER, &leftLEDThread);
-Task tetrisTask(500, TASK_FOREVER, &tetrisThread);
 
 int counter = 0;
-
-void tetrisThread()
-{
-  const auto &pressed = keyboard.toggled();
-  tetris.animate(pressed);
-}
 
 void leftLEDThread()
 {
@@ -82,9 +74,7 @@ void setup()
   l8_right.clear();
   l8_right.setBrightness(0x0f);
   runner.addTask(leftLedTask);
-  runner.addTask(tetrisTask);
   leftLedTask.disable();
-  tetrisTask.enable();
   for( const auto &key: input_pins)
   {
     keyboard.addKey( key, key);

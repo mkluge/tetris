@@ -6,24 +6,30 @@
 #include <Animation.h>
 #include <LEDDisplay.h>
 #include <Keyboard.h>
+#include <GameInterface.h>
 
 
 #pragma once
 
-class TetrisGame
+class TetrisGame : public GameInterface
 {
 public:
     TetrisGame(LEDDisplay &display, int width, int height);
     ~TetrisGame();
 
-    void animate(const Keyboard::key_state_map_t &keys);
+    void start(const Scheduler &scheduler);
+    void stop(const Scheduler &scheduler);
+    void onKey(const Keyboard::key_state_map_t &keys);
+    static void animate();
+
+private:
     bool isOnTop( Animation &top, Animation &bottom);
 
 private:
-    LEDDisplay &display;
+    static LEDDisplay &display;
     int width;
     int height;
-    Animation *falling;
+    static Animation *falling;
     Animation *floor;
 };
 

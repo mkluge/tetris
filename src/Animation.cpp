@@ -125,6 +125,15 @@ void Animation::paint() const
     }
 }
 
+void Animation::unpaint() const
+{
+    for (auto &pixel : pixels)
+    {
+        display.delPixel(pixel.x,
+                         pixel.y);
+    }
+}
+
 void Animation::addPixels(const PixelList &toadd)
 {
     for( auto pixel: toadd)

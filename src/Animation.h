@@ -23,6 +23,7 @@ public:
     virtual void moveInside();
     virtual const Rect boundingBox() const;
     virtual void paint() const;
+    virtual void unpaint() const;
     virtual void addPixels(const PixelList &toadd);
     virtual void removePixels(const PixelList &toremove);
     virtual const PixelList &getPixels();
