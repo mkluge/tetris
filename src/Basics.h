@@ -34,6 +34,7 @@ struct Pixel {
     RGB color;
 };
 bool operator==(const Pixel &lhs, const Pixel &rhs);
+typedef void (*animation)();
 
 RGB ZeroOneToRainbow(double f);
 

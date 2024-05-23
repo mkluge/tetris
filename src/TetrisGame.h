@@ -11,26 +11,26 @@
 
 #pragma once
 
-class TetrisGame : public GameInterface
+class TetrisGame
 {
 public:
     TetrisGame(LEDDisplay &display, int width, int height);
     ~TetrisGame();
 
-    void start(const Scheduler &scheduler);
-    void stop(const Scheduler &scheduler);
-    void onKey(const Keyboard::key_state_map_t &keys);
+    static void start(const Scheduler &scheduler);
+    static void stop(const Scheduler &scheduler);
+    static void onKey(const Keyboard::key_state_map_t &keys);
     static void animate();
 
 private:
     bool isOnTop( Animation &top, Animation &bottom);
 
 private:
-    static LEDDisplay &display;
-    int width;
-    int height;
-    static Animation *falling;
-    Animation *floor;
+    inline static LEDDisplay &display;
+    inline static int width;
+    inline static int height;
+    inline static Animation *falling;
+    inline static Animation *floor;
 };
 
 #endif

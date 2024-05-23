@@ -1,11 +1,11 @@
 #include <TetrisGame.h>
 #include <PointAnimation.h>
 
-TetrisGame::TetrisGame(LEDDisplay &display, int width, int height) :
-    display(display),
-    width(width),
-    height(height)
+TetrisGame::TetrisGame(LEDDisplay &cdisplay, int cwidth, int cheight)
 {
+    display = cdisplay;
+    width = cwidth;
+    height = cheight;
     floor = new Animation(display);
     falling = new PointAnimation(display, 4, 11);
 }
@@ -16,7 +16,7 @@ TetrisGame::~TetrisGame()
 
 void TetrisGame::start(const Scheduler &scheduler)
 {
-    Task hg( 10, TASK_FOREVER, &TetrisGame::animate);
+    Task hg( 10, TASK_FOREVER, TetrisGame::animate);
 }
 
 void TetrisGame::stop(const Scheduler &scheduler)

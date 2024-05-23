@@ -10,9 +10,9 @@
 class GameInterface
 {
 public:
-    virtual void start(const Scheduler &scheduler) = 0;
-    virtual void stop(const Scheduler &scheduler) = 0;
-    virtual void onKey(const Keyboard::key_state_map_t &keys) = 0;
+    static void start(const Scheduler &scheduler);
+    static void stop(const Scheduler &scheduler);
+    static void onKey(const Keyboard::key_state_map_t &keys);
 };
 
 #endif
