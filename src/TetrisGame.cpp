@@ -1,27 +1,26 @@
-#include <TetrisGame.h>
 #include <PointAnimation.h>
+#include <TetrisGame.h>
 
-TetrisGame::TetrisGame(LEDDisplay &cdisplay, int cwidth, int cheight)
+TetrisGame::TetrisGame(LEDDisplay &display, int width, int height, TM1637Display &point_leds)
+    : display(display), width(width), height(height), point_leds(point_leds)
 {
-    display = cdisplay;
-    width = cwidth;
-    height = cheight;
-    floor = new Animation(display);
-    falling = new PointAnimation(display, 4, 11);
+    start();
 }
 
 TetrisGame::~TetrisGame()
-{   
-}
-
-void TetrisGame::start(const Scheduler &scheduler)
-{
-    Task hg( 10, TASK_FOREVER, TetrisGame::animate);
-}
-
-void TetrisGame::stop(const Scheduler &scheduler)
 {
 }
+
+void TetrisGame::start()
+{
+    floor = new TetrisPiece(display);
+    floor->clearPixels();
+    falling = new TetrisPiece(display);
+    timer_interval = 700;
+    points = 0;
+}
+
+void TetrisGame::stop() {}
 
 void TetrisGame::onKey(const Keyboard::key_state_map_t &keys)
 {
@@ -32,69 +31,134 @@ void TetrisGame::onKey(const Keyboard::key_state_map_t &keys)
         const int presses = entry.second;
         if (key == L_JOYSTICK_PIN && presses > 0)
         {
-            x_translate -= presses;
+            if (falling->canTranslate(-1, 0, floor))
+            {
+                falling->unpaint();
+                falling->useCachePixels();
+                falling->paint();
+            }
         }
         if (key == R_JOYSTICK_PIN && presses > 0)
         {
-            x_translate += presses;
+            if (falling->canTranslate(1, 0, floor))
+            {
+                falling->unpaint();
+                falling->useCachePixels();
+                falling->paint();
+            }
         }
-    }
-    // remove old pixels
-    for (const auto &pixel : falling->getPixels())
-    {
-        display.delPixel(pixel.x, pixel.y);
-    }
-    if (falling->boundingBox().start_y == 0)
-    {
-        falling->setColor(100, 200, 50);
-        for (const auto &pixel : falling->getPixels())
+        if (key == D_JOYSTICK_PIN && presses > 0)
         {
-            display.setPixel(pixel.x, pixel.y, pixel.color);
+            // move element down as far as possible
+            while (falling->canTranslate(0, -1, floor))
+            {
+                falling->unpaint();
+                falling->useCachePixels();
+                falling->paint();
+            }
         }
-    }
-    else
-    {
-        falling->translate(x_translate, -1);
-        falling->moveInside();
-        for (const auto &pixel : falling->getPixels())
+        if (key == L_PUSH_PIN || key == R_PUSH_PIN)
         {
-            display.setPixel(pixel.x, pixel.y, pixel.color);
+            if (falling->canRotate(floor))
+            {
+                falling->unpaint();
+                falling->useCachePixels();
+                falling->paint();
+            }
         }
     }
     display.show();
 }
 
+Animation *TetrisGame::createPiece()
+{
+    return new TetrisPiece(display);
+}
+
+/**
+ * animate is called as often as possible
+ */
 void TetrisGame::animate()
 {
-    // let element fall 1 step
-    // remove old pixels
-    falling->unpaint();
-    if (falling->boundingBox().start_y == 0)
+    // get the current millis, get the diff and
+    // figure out, if we need to do a step
+    unsigned millies = millis();
+    auto diff = last_millis - millies;
+    if (diff >= timer_interval)
     {
-        falling->setColor(100, 200, 50);
+        // OK, make a step
+        // let element fall 1 step
+        // remove old pixels
+        falling->unpaint();
+        // do we hit the floor or the ground
+        bool canProceed = falling->canTranslate(0, -1, floor);
+        if (!canProceed)
+        {
+            // check if game is over because highest
+            // line is at top row
+            for( const auto &pixel : falling->getPixels())
+            {
+                if( pixel.y == (height-1) )
+                {
+                    // game finished
+                    display.clear();
+                    start();
+                }
+            }
+            // merge falling into floor
+            floor->addPixels(falling->getPixels());
+            // check for complete rows
+            // future: funny animation for full row removal
+            // and remove complete rows, get points
+            int numDeletedRows = floor->removeFullLines();
+            points += numDeletedRows;
+            point_leds.showNumberDec(points);
+            // draw new floor
+            floor->paint();
+            // create new falling piece
+            falling = new TetrisPiece(display);
+        }
+        else
+        {
+            // we already checked whether there is
+            // space below so just go one down
+            falling->useCachePixels();
+            falling->paint();
+        }
+        display.show();
+        // store time of last action
+        last_millis = millies;
+        // decrease delay between steps
+        // this increases game speed
+        if (timer_interval > 100)
+        {
+            timer_interval--;
+        }
     }
-    else
-    {
-        falling->translate(0, -1);
-    }
-    falling->paint();
-    display.show();
 }
 
 /**
  * checks whether the top animation is standing on the other
  * animation
  */
-bool TetrisGame::isOnTop(Animation &top, Animation &bottom) 
+bool TetrisGame::isOnTop(const Animation *top, const Animation *bottom) const
 {
-    auto top_pixels = top.getPixels();
-    auto bottom_pixels = bottom.getPixels();
+    auto top_pixels = top->getPixels();
+    auto bottom_pixels = bottom->getPixels();
 
     for (auto tpix : top_pixels)
     {
+        // return true if top has a pixel at the last line
+        // in our case -> 0 is the bottom line
+        if (tpix.y == 0)
+        {
+            return true;
+        }
+        // return true if pixel is just above
+        // a pixel of the lower element
         for (auto bpix : bottom_pixels)
         {
-            if( (tpix.x == bpix.x) && (tpix.y-1 == bpix.y) )
+            if ((tpix.x == bpix.x) && (tpix.y - 1 == bpix.y))
             {
                 return true;
             }
@@ -102,4 +166,3 @@ bool TetrisGame::isOnTop(Animation &top, Animation &bottom)
     }
     return false;
 }
-

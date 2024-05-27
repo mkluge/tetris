@@ -35,9 +35,9 @@ std::list<uint8_t> output_pins = {
 
 auto native_display = Adafruit_NeoPixel(PIXELS_X * PIXELS_Y, DISPLAY_PIN, NEO_GRB + NEO_KHZ800);
 AdaNeoDisplay display = AdaNeoDisplay(native_display, PIXELS_X, PIXELS_Y);
-TetrisGame tetris = TetrisGame(display, PIXELS_X, PIXELS_Y);
 TM1637Display l8_left(CLK_LEFT_LED, DIO_LEFT_LED);
 TM1637Display l8_right(CLK_RIGHT_LED, DIO_RIGHT_LED);
+TetrisGame tetris = TetrisGame(display, PIXELS_X, PIXELS_Y, l8_right);
 Keyboard keyboard = Keyboard();
 SteinScherePapier<PIXELS_X, PIXELS_Y> ssp(display);
 Mandelbrot<PIXELS_X, PIXELS_Y> mandelbrot(display);
@@ -88,6 +88,14 @@ void setup()
 
 void loop()
 {
+  // first handle keys, if any
+  auto keys = keyboard.toggled();
+  if( keys.size() )
+  {
+    tetris.onKey(keys);
+  }
+  // then call animation
+  tetris.animate();
   // run all animations
   runner.execute();
 }

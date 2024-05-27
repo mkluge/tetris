@@ -4,7 +4,7 @@
 
 PointAnimation::PointAnimation(LEDDisplay &display, int base_x, int base_y) : Animation(display)
 {
-    pixels.push_back({base_x, base_y, {0, 255, 255}});
+    internal_pixels.push_back({base_x, base_y, {0, 255, 255}});
     brightness = 255;
 }
 

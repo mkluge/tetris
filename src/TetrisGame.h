@@ -3,34 +3,39 @@
 
 #include <list>
 #include <functional>
-#include <Animation.h>
+#include <TetrisPiece.h>
 #include <LEDDisplay.h>
 #include <Keyboard.h>
 #include <GameInterface.h>
-
+#include <TM1637Display.h>
 
 #pragma once
 
-class TetrisGame
+class TetrisGame : public GameInterface
 {
 public:
-    TetrisGame(LEDDisplay &display, int width, int height);
+    TetrisGame(LEDDisplay &display, int width, int height, TM1637Display& point_leds);
     ~TetrisGame();
 
-    static void start(const Scheduler &scheduler);
-    static void stop(const Scheduler &scheduler);
-    static void onKey(const Keyboard::key_state_map_t &keys);
-    static void animate();
+    void start();
+    void stop();
+    void onKey(const Keyboard::key_state_map_t &keys);
+    void animate();
 
 private:
-    bool isOnTop( Animation &top, Animation &bottom);
+    bool isOnTop( const Animation *top, const Animation *bottom) const;
+    Animation *createPiece();
 
 private:
-    inline static LEDDisplay &display;
-    inline static int width;
-    inline static int height;
-    inline static Animation *falling;
-    inline static Animation *floor;
+    LEDDisplay &display;
+    int width;
+    int height;
+    TM1637Display& point_leds;
+    int points;
+    TetrisPiece *falling;
+    TetrisPiece *floor;
+    unsigned long timer_interval;
+    unsigned long last_millis;
 };
 
 #endif

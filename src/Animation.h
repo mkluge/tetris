@@ -9,7 +9,6 @@
 class Animation
 {
 public:
-    typedef std::list<Pixel> PixelList;
     enum Rotation
     {
         LEFT,
@@ -17,22 +16,29 @@ public:
     };
 
     Animation(LEDDisplay &display);
-    virtual void rotate(Rotation direction, bool keepInside = false);
-    virtual void translate(int x, int y, bool keepInside = false);
+    virtual bool canTranslate(int x, int y, Animation *mayCrashInto);
+    virtual bool canRotate(Animation *mayCrashInto);
+    virtual void useCachePixels();
     virtual void setColor(unsigned short red, unsigned short green, unsigned short blue);
-    virtual void moveInside();
+    virtual void moveInside(Animation *mayCrashInto);
     virtual const Rect boundingBox() const;
     virtual void paint() const;
+    virtual const bool pixelOutsideScreen( int x, int y) const;
+    virtual const bool pixelInside( int x, int y, Animation *mayCrashInto) const;
     virtual void unpaint() const;
     virtual void addPixels(const PixelList &toadd);
     virtual void removePixels(const PixelList &toremove);
-    virtual const PixelList &getPixels();
-    // for Tetris
-    void removeLine(int line);
+    virtual const PixelList getPixels() const;
+    virtual void clearPixels();
 
 protected:
     LEDDisplay &display;
-    PixelList pixels;
+    PixelList internal_pixels;
+    PixelList cache_pixels;
+    int offset_x;
+    int offset_y;
+    int display_width;
+    int display_height;
 };
 
 #endif

@@ -2,10 +2,20 @@
 
 Animation::Animation(LEDDisplay &display) : display(display)
 {
+    display_width = display.width();
+    display_height = display.height();
 }
 
-void Animation::rotate(Rotation direction, bool keepInside)
+/***
+ * calculates if a animation can be rotated clockwise
+ * without leaving the screen or crashing into the given
+ * animation, leaves calculated new pixels in the internal
+ * pixel cache, cache incomplete if function returns false
+ */
+bool Animation::canRotate(Animation *mayCrashInto)
 {
+    int direction = RIGHT;
+    cache_pixels.clear();
     // rotation matrix in 2D is
     // R = ( cos(a) -sin(a))
     //     ( sin(a)  cos(a))
@@ -15,56 +25,94 @@ void Animation::rotate(Rotation direction, bool keepInside)
     // -90 dregees is:
     // R = ( 0  1 ) -> x = y ; y = -x
     //     ( -1 0 )
-    for (auto &pixel : pixels)
+    for (auto &pixel : internal_pixels)
     {
+        int x, y;
         if (direction == RIGHT)
         {
-            auto oldx = pixel.x;
-            pixel.x = -pixel.y;
-            pixel.y = oldx;
+            x = offset_x - pixel.y;
+            y = offset_y + pixel.x;
         }
         if (direction == LEFT)
         {
-            auto oldx = pixel.x;
-            pixel.x = pixel.y;
-            pixel.y = -oldx;
+            x = offset_x + pixel.y;
+            y = offset_y - pixel.x;
         }
+        if (pixelOutsideScreen(x, y))
+        {
+            return false;
+        }
+        if (pixelInside(x, y, mayCrashInto))
+        {
+            return false;
+        }
+        cache_pixels.push_back({x, y, pixel.color});
     }
-    if (keepInside)
-    {
-        moveInside();
-    }
+    return true;
 }
 
-void Animation::translate(int move_x, int move_y, bool keepInside)
+const bool Animation::pixelOutsideScreen(int x, int y) const
 {
-    for (auto &pixel : pixels)
+    if (x < 0 || x >= display_width)
     {
-        display.setPixel( pixel.x, pixel.y, {0,0,0});
-        pixel.x += move_x;
-        pixel.y += move_y;
+        return true;
     }
-    if (keepInside)
+    if (y < 0 || y >= display_height)
     {
-        moveInside();
+        return true;
     }
+    return false;
+}
+
+const bool Animation::pixelInside(int x, int y, Animation *mayCrashInto) const
+{
+    auto fpixels = mayCrashInto->getPixels();
+    for (auto fpix : fpixels)
+    {
+        if ((fpix.x == x) && (fpix.y == y))
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+/**
+ * can this Animation move there without going beyond a wall,
+ * beyond the ground and without colliding with the floor
+ * animation
+ */
+bool Animation::canTranslate(int x, int y, Animation *mayCrashInto)
+{
+    for (auto &pixel : internal_pixels)
+    {
+        // new place for this pixel
+        int pixelx = offset_x + pixel.x + x;
+        int pixely = offset_y + pixel.y + y;
+        // now check conditions
+        if (pixelOutsideScreen(x, y))
+        {
+            return false;
+        }
+        if (pixelInside( x, y, mayCrashInto))
+        {
+            return false;
+        }
+        cache_pixels.push_back({x, y, pixel.color});
+    }
+    return true;
 }
 
 void Animation::setColor(unsigned short red, unsigned short green, unsigned short blue)
 {
-    for (auto &pixel : pixels)
+    for (auto &pixel : internal_pixels)
     {
         pixel.color = {red, green, blue};
     }
 }
 
-void Animation::moveInside()
+void Animation::moveInside(Animation *mayCrashInto)
 {
-    // check all coordinates if they are
-    // outside the screen, if -> move everything
-    // probably dangerous if animation is wider than
-    // the screen
-
     int move_x = 0;
     int move_y = 0;
     struct Rect bb = boundingBox();
@@ -86,14 +134,22 @@ void Animation::moveInside()
     }
     if (move_x != 0 || move_y != 0)
     {
-        translate(move_x, move_y, false);
+        if(canTranslate(move_x, move_y, mayCrashInto))
+        {
+            useCachePixels();
+        }
     }
+}
+
+void Animation::useCachePixels()
+{
+    internal_pixels = cache_pixels;
 }
 
 const Rect Animation::boundingBox() const
 {
     struct Rect retval = {display.width(), display.height(), 0, 0};
-    for (auto &pixel : pixels)
+    for (auto &pixel : internal_pixels)
     {
         if (pixel.x < retval.start_x)
         {
@@ -117,7 +173,7 @@ const Rect Animation::boundingBox() const
 
 void Animation::paint() const
 {
-    for (auto &pixel : pixels)
+    for (auto &pixel : internal_pixels)
     {
         display.setPixel(pixel.x,
                          pixel.y,
@@ -127,51 +183,42 @@ void Animation::paint() const
 
 void Animation::unpaint() const
 {
-    for (auto &pixel : pixels)
+    for (auto &pixel : internal_pixels)
     {
-        display.delPixel(pixel.x,
-                         pixel.y);
+        display.delPixel(pixel.x + offset_x,
+                         pixel.y + offset_y);
     }
 }
 
 void Animation::addPixels(const PixelList &toadd)
 {
-    for( auto pixel: toadd)
+    for (auto pixel : toadd)
     {
-        pixels.push_back(pixel);
-    }    
+        internal_pixels.push_back(pixel);
+    }
 }
 
 void Animation::removePixels(const PixelList &toremove)
 {
     for (const auto pixel : toremove)
     {
-        pixels.remove(pixel);
+        internal_pixels.remove(pixel);
     }
 }
 
-const Animation::PixelList &Animation::getPixels()
+const PixelList Animation::getPixels() const
 {
-    return pixels;
-}
-
-/**
- * all lines bigger than the selected one is moved one up
- */
-void Animation::removeLine(int line)
-{
-    std::list<Pixel> new_pixels;
-    for (auto &pixel : pixels)
+    PixelList retval;
+    for (auto &pixel : internal_pixels)
     {
-        if (pixel.y < line)
-        {
-            new_pixels.push_back(pixel);
-        }
-        else if (pixel.y > line)
-        {
-            pixel.y--;
-            new_pixels.push_back(pixel);
-        }
+        retval.push_back({pixel.x + offset_x,
+                          pixel.y + offset_y,
+                          pixel.color});
     }
-    pixels = new_pixels;
+    return retval;
+}
+
+void Animation::clearPixels()
+{
+    internal_pixels.clear();
 }

@@ -2,6 +2,7 @@
 #define BASIC_H
 
 #include <tuple>
+#include <list>
 
 #pragma once
 
@@ -28,11 +29,20 @@ struct RGB {
     unsigned short blue;    
 };
 
+// some colors
+#define TYELLOW {0xFF, 0xFF, 0x00}
+#define TGREEN {0x00, 0xFF, 0x00}
+#define TRED {0xFF, 0x00, 0x00}
+#define TBLUE {0x00, 0x00, 0xFF}
+#define TORANGE {0xFF, 0xA5, 0X00}
+#define TPINK {0xFF, 0x69, 0xB4}
+#define TBROWN {0x8B, 0x45, 0x13}
 struct Pixel {
     int x;
     int y;
     RGB color;
 };
+typedef std::list<Pixel> PixelList;
 bool operator==(const Pixel &lhs, const Pixel &rhs);
 typedef void (*animation)();
 
