@@ -136,33 +136,3 @@ void TetrisGame::animate()
         }
     }
 }
-
-/**
- * checks whether the top animation is standing on the other
- * animation
- */
-bool TetrisGame::isOnTop(const Animation *top, const Animation *bottom) const
-{
-    auto top_pixels = top->getPixels();
-    auto bottom_pixels = bottom->getPixels();
-
-    for (auto tpix : top_pixels)
-    {
-        // return true if top has a pixel at the last line
-        // in our case -> 0 is the bottom line
-        if (tpix.y == 0)
-        {
-            return true;
-        }
-        // return true if pixel is just above
-        // a pixel of the lower element
-        for (auto bpix : bottom_pixels)
-        {
-            if ((tpix.x == bpix.x) && (tpix.y - 1 == bpix.y))
-            {
-                return true;
-            }
-        }
-    }
-    return false;
-}

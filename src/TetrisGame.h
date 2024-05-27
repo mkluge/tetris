@@ -23,7 +23,6 @@ public:
     void animate();
 
 private:
-    bool isOnTop( const Animation *top, const Animation *bottom) const;
     Animation *createPiece();
 
 private:

@@ -20,7 +20,34 @@ TetrisPiece::~TetrisPiece()
 
 int TetrisPiece::removeFullLines()
 {
-    
+    int removed_lines = 0;
+    // from the bottom up remove all full lines
+    for( int line = display_height-1; line>=0; line--)
+    {
+        // count pieces in all lines
+        int piecesPerLine[display_height];
+        for( const auto &pixel : internal_pixels )
+        {
+            auto x = offset_x + pixel.x;
+            auto y = offset_y + pixel.y;
+
+            if (x < 0 || x>=display_width || y<0 || y>=display_width)
+            {
+                // shall not happen, but ...
+                continue;
+            }
+            piecesPerLine[y]++;
+        }
+        if(piecesPerLine[line]==(display_width-1))
+        {
+            removed_lines++;
+            removeLine(line);
+            // we need to check the same line again
+            // FIXME
+            line ++;
+        }
+    }
+    return removed_lines;
 }
 
 /**
