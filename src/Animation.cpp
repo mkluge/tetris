@@ -1,4 +1,5 @@
 #include "Animation.h"
+#include <esp_random.h>
 
 Animation::Animation(LEDDisplay &display) : display(display)
 {
@@ -171,13 +172,33 @@ const Rect Animation::boundingBox() const
     return retval;
 }
 
-void Animation::paint() const
+void Animation::paint(const int color_variation) const
 {
     for (auto &pixel : internal_pixels)
     {
+        auto color = pixel.color;
+        // variate colors up to color_variation for rgb
+        if( color_variation!=0 )
+        {
+            uint32_t rand_num = esp_random();
+            // take 10 bits for each pixel
+            int red_pixels = (rand_num & 255);
+            int green_pixels = (rand_num>>8) & 255;
+            int blue_pixels = (rand_num>>16) & 255;
+            // so the pixels are always +- original value
+            int range = color_variation<<1;
+            int red_variation = (red_pixels % range) - color_variation;
+            int green_variation = (green_pixels % range) - color_variation;
+            int blue_variation = (blue_pixels % range) - color_variation;
+            color = {
+                (unsigned short)(min3( 0, 255, (int)(color.red + red_variation))),
+                (unsigned short)(min3( 0, 255, (int)(color.green + green_variation))),
+                (unsigned short)(min3( 0, 255, (int)(color.blue + blue_variation))),
+            };
+        }
         display.setPixel(pixel.x,
                          pixel.y,
-                         pixel.color);
+                         color);
     }
 }
 

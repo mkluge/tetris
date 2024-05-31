@@ -22,7 +22,7 @@ public:
     virtual void setColor(unsigned short red, unsigned short green, unsigned short blue);
     virtual void moveInside(Animation *mayCrashInto);
     virtual const Rect boundingBox() const;
-    virtual void paint() const;
+    virtual void paint(int color_variation = 0) const;
     virtual const bool pixelOutsideScreen( int x, int y) const;
     virtual const bool pixelInside( int x, int y, Animation *mayCrashInto) const;
     virtual void unpaint() const;

@@ -45,6 +45,10 @@ struct Pixel {
 typedef std::list<Pixel> PixelList;
 bool operator==(const Pixel &lhs, const Pixel &rhs);
 typedef void (*animation)();
+template <typename T>
+T min3(T a, T b, T c) {
+    return (a < b) ? ((a < c) ? a : c) : ((b < c) ? b : c);
+}
 
 RGB ZeroOneToRainbow(double f);
 
