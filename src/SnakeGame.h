@@ -40,25 +40,22 @@ class SnakeGame
             );
             for(int i = 0; i < MAX_SNAKE_LENGTH; i++)
             {
-                this->mySnake[i][0] = 0;
-                this->mySnake[i][1] = 0;
+                this->mySnake[i] = {0, 0};
             }
 
 
             this->currentSnakeLength = 2;
             this->currentSnakeDirection = SnakeGame::SNAKE_DIRECTION::RIGHT;
 
-            this->mySnake[0][0] = 1;
-            this->mySnake[0][1] = size_y / 2 - 1;
-            this->mySnake[1][0] = 0;
-            this->mySnake[1][1] = size_y / 2 - 1;
+            this->mySnake[0] = {1, size_y / 2 - 1};
+            this->mySnake[1] = {0, size_y / 2 - 1};
             //Serial.begin(9600);
             //Serial.println("Hello World");
         }
         Position calculateSnakeDirection() {
             Position nextSnakePos = {
-                this->mySnake[0][0],
-                this->mySnake[0][1]
+                this->mySnake[0].x,
+                this->mySnake[0].y
             };
             // TODO: implement collision detection
             switch(this->currentSnakeDirection) {
@@ -71,13 +68,13 @@ class SnakeGame
                 case SNAKE_DIRECTION::RIGHT:
                     nextSnakePos.x++;
                     // Out of Bounds: Right side
-                    if(size_x >= nextSnakePos.x)
+                    if(size_x <= nextSnakePos.x)
                         nextSnakePos.x = 0;
                     break;
                 case SNAKE_DIRECTION::UP:
                     nextSnakePos.y++;
                     // Out of Bounds: Top
-                    if(size_y >= nextSnakePos.y)
+                    if(size_y <= nextSnakePos.y)
                         nextSnakePos.y = 0;
                     break;
                 case SNAKE_DIRECTION::DOWN:
@@ -91,23 +88,22 @@ class SnakeGame
         }
         void moveSnake(Position nextSnakePos) {
             // Reset last Pixel
-            this->snakeMatrix[this->mySnake[this->currentSnakeLength - 1][0]]
-                [this->mySnake[this->currentSnakeLength - 1][1]].reset();
+            this->snakeMatrix[this->mySnake[this->currentSnakeLength - 1].x]
+                [this->mySnake[this->currentSnakeLength - 1].y].reset();
 
             // Move other pieces of the Snake a pixel further
             for(int i = 0; i < (this->currentSnakeLength - 1); i++)
             {
-                this->mySnake[i + 1][0] = this->mySnake[i][0];
-                this->mySnake[i + 1][1] = this->mySnake[i][1];
-                this->snakeMatrix[this->mySnake[i + 1][0]]
-                    [this->mySnake[i + 1][1]].age();
+                this->mySnake[i + 1].x = this->mySnake[i].x;
+                this->mySnake[i + 1].y = this->mySnake[i].y;
+                this->snakeMatrix[this->mySnake[i + 1].x]
+                    [this->mySnake[i + 1].y].age();
             }
 
             // Set the beginning of the Snake
-            this->mySnake[0][0] = nextSnakePos.x;
-            this->mySnake[0][1] = nextSnakePos.y;
-            this->snakeMatrix[this->mySnake[0][0]]
-                [this->mySnake[0][1]].setPixel(
+            this->mySnake[0] = nextSnakePos;
+            this->snakeMatrix[this->mySnake[0].x]
+                [this->mySnake[0].y].setPixel(
                 SnakePixel::SNAKE_OBJECT_TYPE::SNAKE,
                 0.0,
                 0.0);
@@ -138,10 +134,11 @@ class SnakeGame
         static const int MAX_SNAKE_LENGTH = 100;
         int currentSnakeLength = 0;
         SnakeGame::SNAKE_DIRECTION currentSnakeDirection = SnakeGame::SNAKE_DIRECTION::RIGHT;
-        int mySnake[MAX_SNAKE_LENGTH][2];
+        Position mySnake[MAX_SNAKE_LENGTH];
         int counter = 0;
 };
 
+// Lars disapproves of this coding style:
 void run_snake() {
     // initialization
     int idle = 0;
@@ -152,7 +149,7 @@ void run_snake() {
     // main loop
     while (true) {
         int last_millis = millis();
-        
+
         // game logic
 	if (game.snakeGameEngine()) {
 		return; // graceful exit
