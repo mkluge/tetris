@@ -54,7 +54,7 @@ class SnakePixel {
                     break;
                 case FOOD:
                     this->lastPixelColor.red = 176;
-                    this->lastPixelColor.green = 176;
+                    this->lastPixelColor.green = random(176);
                     this->lastPixelColor.blue = 0;
                     break;
                 case WALL:

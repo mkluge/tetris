@@ -131,23 +131,26 @@ class SnakeGame
                 }
             }
         }
-        bool applyFoodIfFound(Position nexSnakePos) {
-            this->currentSnakeLength++;
-            return this->placeNewFood();
+        bool applyFoodIfFound(Position nextSnakePos) {
+            if (this->snakeMatrix[nextSnakePos.x][nextSnakePos.y].getType() == SnakePixel::SNAKE_OBJECT_TYPE::FOOD) {
+                this->currentSnakeLength++;
+                return !this->placeNewFood();
+            }
         }
         bool placeNewFood() {
             int tries = 0;
             while (tries < 2 * MAX_SNAKE_LENGTH) {
                 int x = random(size_x);
                 int y = random(size_y);
-                if (snakeMatrix[x][y].type == SnakePixel::SNAKE_OBJECT_TYPE::EMPTY) {
+                if (snakeMatrix[x][y].getType() == SnakePixel::SNAKE_OBJECT_TYPE::EMPTY) {
                     // we found a nice new place
-                    snakeMatrix[x][y].type = SnakePixel::SNAKE_OBJECT_TYPE::FOOD;
+                    snakeMatrix[x][y].setPixel(SnakePixel::SNAKE_OBJECT_TYPE::FOOD, 0, 0);
+                    return true;
                 }
                 tries++; // otherwise: try again
             }
             // no further place to place: we won
-            return true;
+            return false;
         }
         bool doesSnakeCollideAtPos(Position nextSnakePos) {
             switch(this->snakeMatrix[nextSnakePos.x][nextSnakePos.y].getType()) {
@@ -181,7 +184,7 @@ class SnakeGame
 
             // TODO: fill snakeMatrix (and it's color)
             this->counter++;
-	    return false;
+            return false;
         }
         void paint() {
             for(int y_index = 0; y_index < size_y; y_index++)
