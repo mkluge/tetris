@@ -1,6 +1,36 @@
 #include <vector>
 #include <utility>
 
+class enemy_t {
+    public:
+    int x;
+    int y;
+    int type;
+    int state;
+    enemy_t(int x, int y): x(x), y(y), state(0) {}
+    void step() {
+        switch (state) {
+            case 0:
+                x++;
+                state++;
+                break;
+            case 1:
+                y--;
+                state++;
+                break;
+            case 2:
+                x--;
+                state++;
+                break;
+            case 3:
+                y--;
+                state = 0;
+                break;
+
+        }
+    }
+};
+
 void spaceshooter() {
     // initialization
     int idle = 0;
@@ -20,6 +50,10 @@ void spaceshooter() {
     int reload = 0;
     int shipx = 4;
 
+    int level = 1;
+    int score = 0;
+    std::vector<enemy_t> enemies;
+    enemies.push_back(enemy_t(2, 10));
 
     // main loop
     while (true) {
@@ -62,17 +96,74 @@ void spaceshooter() {
         }
         for (auto shot = shots.begin(); shot != shots.end(); shot) {
             (*shot) = std::pair<int, int>(shot->first, shot->second+1);
-            // TODO: check collision against enemy
-            if (shot->second > 11) {
+            bool shotEnd = shot->second > 11;
+            // check collision against enemy
+            for (auto it = enemies.begin(); it != enemies.end(); it) {
+                if (it->x == shot->first && it->y == shot->second) {
+                    it = enemies.erase(it);
+                    shotEnd++;
+                    score+=50;
+                } else {
+                    it++;
+                }
+            }
+            if (shotEnd) {
                 // shot has left the screen
                 shot = shots.erase(shot);
             } else {
                 shot++;
             }
         }
+        if (random(5) == 0) {
+            for (auto it = enemies.begin(); it != enemies.end(); it) {
+                it->step();
+                if (it->y < 0) {
+                    // lose animation if it->x == shipx+-1
+                    if (it->x >= shipx - 1 && it->x <= shipx+1) {
+                        // you lose
+                        int idle = 0;
+                        while (true) {
+                            int last_millis = millis();
+                            // game logic
+                            idle++;
+                            if (idle > 500) {
+                                return; // end the game for all
+                            }
+
+                            // blood render
+                            l8_left.showNumberDec(idle);
+                            RGB color;
+                            color.red = random(256);
+                            color.green = 0;
+                            color.blue = 0;
+                            display.setPixel(random(8), random(12), color);
+                            display.show();
+
+                            // busy waiting loop until next frame
+                            while (millis() - last_millis < 30) {
+                                // busy spin loop until frame time is over
+                            }
+
+                        }
+                    }
+                    it = enemies.erase(it);
+                } else {
+                    it++;
+                }
+            }
+        }
+
+        if (enemies.size() == 0) {
+            // level up sequence
+            level++;
+            for (int i = 0; i < level; i++) {
+                enemies.push_back(enemy_t(random(8), random(5)+7));
+            }
+        }
 
         // game render
-        l8_left.showNumberDec(idle);
+        l8_left.showNumberDec(level);
+        l8_right.showNumberDec(score);
         display.clear();
         // render stars
         RGB color;
@@ -96,6 +187,13 @@ void spaceshooter() {
             color.green = 0;
             color.blue = 0;
             display.setPixel(shot.first, shot.second, color);
+        }
+        // render enemies
+        for (auto &enemy: enemies) {
+            color.red = 0;
+            color.green = 200;
+            color.blue = 0;
+            display.setPixel(enemy.x, enemy.y, color);
         }
         display.show();
 
