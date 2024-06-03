@@ -212,7 +212,7 @@ public:
 
                     // main loop
                     for (int row = 11; row >= 0; row--) {
-                        for (int brightness = 250; brightness >= 0; brightness-= 50) {
+                        for (int brightness = 200; brightness >= 0; brightness-= 100) {
                             int last_millis = millis();
 
                             // game logic
