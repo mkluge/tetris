@@ -45,6 +45,8 @@ class SnakeGame
             {
                 this->mySnake[i] = {0, 0};
             }
+            // place some food
+            this->placeNewFood();
 
 
             this->currentSnakeLength = 2;
@@ -129,8 +131,23 @@ class SnakeGame
                 }
             }
         }
-        void applyFoodIfFound(Position nexSnakePos) {
-            // TODO: implement
+        bool applyFoodIfFound(Position nexSnakePos) {
+            this->currentSnakeLength++;
+            return this->placeNewFood();
+        }
+        bool placeNewFood() {
+            int tries = 0;
+            while (tries < 2 * MAX_SNAKE_LENGTH) {
+                int x = random(size_x);
+                int y = random(size_y);
+                if (snakeMatrix[x][y].type == SnakePixel::SNAKE_OBJECT_TYPE::EMPTY) {
+                    // we found a nice new place
+                    snakeMatrix[x][y].type = SnakePixel::SNAKE_OBJECT_TYPE::FOOD;
+                }
+                tries++; // otherwise: try again
+            }
+            // no further place to place: we won
+            return true;
         }
         bool doesSnakeCollideAtPos(Position nextSnakePos) {
             switch(this->snakeMatrix[nextSnakePos.x][nextSnakePos.y].getType()) {
@@ -148,7 +165,9 @@ class SnakeGame
             if(0 == (this->counter % 6)) // be a little slower
             {
                 Position nextSnakePos = this->calculateSnakeDirection();
-                this->applyFoodIfFound(nextSnakePos);
+                if (this->applyFoodIfFound(nextSnakePos)) {
+                    // TODO: winning screen! (no more food to place)
+                }
                 if(!this->doesSnakeCollideAtPos(nextSnakePos))
                 {
                     this->moveSnake(nextSnakePos);
