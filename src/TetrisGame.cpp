@@ -17,7 +17,7 @@ void TetrisGame::start()
     falling = new TetrisPiece(display);
     timer_interval = 700;
     points = 0;
-    last_millis = 0;
+    last_millis = millis();
 }
 
 void TetrisGame::stop() {}
@@ -57,14 +57,14 @@ void TetrisGame::onKey(const Keyboard::key_state_map_t &keys)
                 falling->paint();
             }
         }
-        if (key == L_PUSH_PIN || key == R_PUSH_PIN)
-        {
-            if (falling->canRotate(floor))
+        if ((key == L_PUSH_PIN || key == R_PUSH_PIN) &&presses > 0)
             {
-                falling->unpaint();
-                falling->useCachePixels();
-                falling->paint();
-            }
+                if (falling->canRotate(floor))
+                {
+                    falling->unpaint();
+                    falling->useCachePixels();
+                    falling->paint();
+                }
         }
     }
     display.show();

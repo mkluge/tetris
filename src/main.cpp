@@ -43,26 +43,8 @@ SteinScherePapier<PIXELS_X, PIXELS_Y> ssp(display);
 Mandelbrot<PIXELS_X, PIXELS_Y> mandelbrot(display);
 Plasma<PIXELS_X, PIXELS_Y> plasma(display);
 
-void sspThread();
-void leftLEDThread();
-Scheduler runner;
-Task leftLedTask(10, TASK_FOREVER, &leftLEDThread);
-
 int counter = 0;
 
-void leftLEDThread()
-{
-  l8_left.showNumberDec(counter);
-  counter++;
-}
-
-void blinkThread()
-{
-  static int lr = false;
-  digitalWrite(BUTTON_LEFT_LED, lr ? 0 : 1);
-  digitalWrite(BUTTON_RIGHT_LED, lr ? 1 : 0);
-  lr = !lr;
-}
 
 void setup()
 {
@@ -73,8 +55,6 @@ void setup()
   l8_left.showNumberDec(1234);
   l8_right.clear();
   l8_right.setBrightness(0x0f);
-  runner.addTask(leftLedTask);
-  leftLedTask.disable();
   for( const auto &key: input_pins)
   {
     keyboard.addKey( key, key);
@@ -98,6 +78,4 @@ void loop()
   }
   // then call animation
   tetris.animate();
-  // run all animations
-  runner.execute();
 }

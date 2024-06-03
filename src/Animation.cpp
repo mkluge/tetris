@@ -56,11 +56,7 @@ bool Animation::canRotate(Animation *mayCrashInto)
 
 const bool Animation::pixelOutsideScreen(int x, int y) const
 {
-    if (x < 0 || x >= display_width)
-    {
-        return true;
-    }
-    if (y < 0 || y >= display_height)
+    if (x < 0 || x >= display_width || y < 0 || y >= display_height)
     {
         return true;
     }
@@ -69,8 +65,7 @@ const bool Animation::pixelOutsideScreen(int x, int y) const
 
 const bool Animation::pixelInside(int x, int y, Animation *mayCrashInto) const
 {
-    auto fpixels = mayCrashInto->getPixels();
-    for (auto fpix : fpixels)
+    for (const auto &fpix : mayCrashInto->getPixels())
     {
         if ((fpix.x == x) && (fpix.y == y))
         {
