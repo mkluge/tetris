@@ -91,10 +91,13 @@ class SnakeGame
             }
             return nextSnakePos;
         }
-        void moveSnake(Position nextSnakePos) {
+        void moveSnake(Position nextSnakePos, bool lengtheningSnake) {
             // Reset last Pixel
-            this->snakeMatrix[this->mySnake[this->currentSnakeLength - 1].x]
-                [this->mySnake[this->currentSnakeLength - 1].y].reset();
+            if(!lengtheningSnake)
+            {
+                this->snakeMatrix[this->mySnake[this->currentSnakeLength - 1].x]
+                    [this->mySnake[this->currentSnakeLength - 1].y].reset();
+            }
 
             // Move other pieces of the Snake a pixel further
             for(int i = 0; i < (this->currentSnakeLength - 1); i++)
@@ -131,10 +134,10 @@ class SnakeGame
                 }
             }
         }
-        bool applyFoodIfFound(Position nextSnakePos) {
-            if (this->snakeMatrix[nextSnakePos.x][nextSnakePos.y].getType() == SnakePixel::SNAKE_OBJECT_TYPE::FOOD) {
+        bool applyFoodIfFound(SnakePixel::SNAKE_OBJECT_TYPE pixelType, Position nextSnakePos) {
+            if (SnakePixel::SNAKE_OBJECT_TYPE::FOOD == pixelType) {
                 this->currentSnakeLength++;
-                return !this->placeNewFood();
+                return true;
             }
             return false;
         }
@@ -153,14 +156,18 @@ class SnakeGame
             // no further place to place: we won
             return false;
         }
-        bool doesSnakeCollideAtPos(Position nextSnakePos) {
-            switch(this->snakeMatrix[nextSnakePos.x][nextSnakePos.y].getType()) {
+        SnakePixel::SNAKE_OBJECT_TYPE getTypeAtPos(Position posToCheck)
+        {
+            return this->snakeMatrix[posToCheck.x][posToCheck.y].getType();
+        }
+        bool isWalkableType(SnakePixel::SNAKE_OBJECT_TYPE typeToCheck) {
+            switch(typeToCheck) {
                 case SnakePixel::SNAKE_OBJECT_TYPE::WALL:
                 case SnakePixel::SNAKE_OBJECT_TYPE::SNAKE:
-                    return true;
+                    return false;
                     // pass otherwise
             }
-            return false;
+            return true;
         }
         bool snakeGameEngine() {
             this->applyKeyboardInputs();
@@ -169,12 +176,20 @@ class SnakeGame
             if(0 == (this->counter % 6)) // be a little slower
             {
                 Position nextSnakePos = this->calculateSnakeDirection();
-                if (this->applyFoodIfFound(nextSnakePos)) {
-                    // TODO: winning screen! (no more food to place)
+                SnakePixel::SNAKE_OBJECT_TYPE nextPixelType = this->getTypeAtPos(nextSnakePos);
+                bool lengtheningSnake = false;
+                if (this->applyFoodIfFound(nextPixelType, nextSnakePos)) {
+                    if(this->placeNewFood())
+                    {
+                        lengtheningSnake = true;
+                    } else
+                    {
+                        // TODO: winning screen! (no more food to place)
+                    }
                 }
-                if(!this->doesSnakeCollideAtPos(nextSnakePos))
+                if(this->isWalkableType(nextPixelType))
                 {
-                    this->moveSnake(nextSnakePos);
+                    this->moveSnake(nextSnakePos, lengtheningSnake);
                 } else  // Collision
                 {
                     // Game-Over
