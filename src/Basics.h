@@ -46,8 +46,8 @@ typedef std::list<Pixel> PixelList;
 bool operator==(const Pixel &lhs, const Pixel &rhs);
 typedef void (*animation)();
 template <typename T>
-T min3(T a, T b, T c) {
-    return (a < b) ? ((a < c) ? a : c) : ((b < c) ? b : c);
+T minmax(T minval, T maxval, T val) {
+    return (val < minval) ? minval : ((val>maxval) ? maxval : val);
 }
 
 RGB ZeroOneToRainbow(double f);

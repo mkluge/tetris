@@ -191,9 +191,9 @@ void Animation::paint(const int color_variation) const
             int green_variation = (green_pixels % range) - color_variation;
             int blue_variation = (blue_pixels % range) - color_variation;
             color = {
-                (unsigned short)(min3( 0, 255, (int)(color.red + red_variation))),
-                (unsigned short)(min3( 0, 255, (int)(color.green + green_variation))),
-                (unsigned short)(min3( 0, 255, (int)(color.blue + blue_variation))),
+                (unsigned short)(minmax( 0, 255, (int)(color.red + red_variation))),
+                (unsigned short)(minmax( 0, 255, (int)(color.green + green_variation))),
+                (unsigned short)(minmax( 0, 255, (int)(color.blue + blue_variation))),
             };
         }
         display.setPixel(pixel.x,
