@@ -2,7 +2,6 @@
 #include <Arduino.h>
 #include <AdaNeoDisplay.h>
 #include <TetrisGame.h>
-#include <TaskScheduler.h>
 #include <TM1637Display.h>
 #include <Keyboard.h>
 #include <SteinScherePapier.h>
@@ -58,42 +57,6 @@ Laufschrift laufschrift(display);
 
 #define ANIMATION plasma
 
-Scheduler runner;
-
-void laufschriftRun() {
-  laufschrift.run();
-}
-Task laufschriftTask(30, TASK_FOREVER, &laufschriftRun);
-/*
-void sspThread();
-void animationThread();
-void leftLEDThread();
-Task animationTask(10, TASK_FOREVER, &animationThread);
-Task leftLedTask(10, TASK_FOREVER, &leftLEDThread);
-
-int counter = 0;
-
-void animationThread()
-{
-  ANIMATION.paint();
-}
-
-void leftLEDThread()
-{
-  l8_left.showNumberDec(counter);
-  l8_right.showNumberDec(counter);
-  counter++;
-}
-
-void blinkThread()
-{
-  static int lr = false;
-  digitalWrite(BUTTON_LEFT_LED, lr ? 0 : 1);
-  digitalWrite(BUTTON_RIGHT_LED, lr ? 1 : 0);
-  lr = !lr;
-}
-*/
-
 void setup()
 {
   display.start();
@@ -104,14 +67,6 @@ void setup()
   l8_right.clear();
   l8_right.setBrightness(0x0f);
 
-  runner.addTask(laufschriftTask);
-  laufschriftTask.enable();
-  /*
-  runner.addTask(animationTask);
-  runner.addTask(leftLedTask);
-  leftLedTask.enable();
-  animationTask.enable();
-  */
   for( const auto &key: input_pins)
   {
     keyboard.addKey( key, key);
@@ -126,13 +81,5 @@ void setup()
 
 void loop()
 {
-
-  // const auto &pressed = keyboard.toggled();
-  // if (pressed.size())
-  // {
-  //   ANIMATION.init();
-  //   counter=0;
-  // }
-  // run all animations
-  runner.execute();
+  laufschrift.run(); // dosen't return
 }

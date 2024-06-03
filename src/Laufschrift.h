@@ -5,29 +5,74 @@
 inline int MAX(int a, int b) { return((a) > (b) ? a : b); }
 inline int MIN(int a, int b) { return((a) < (b) ? a : b); }
 
+typedef void(*func)();
+
+
+// reference implementation for an empty game
+void dummygame() {
+    // initialization
+    int idle = 0;
+
+    // main loop
+    while (true) {
+        int last_millis = millis();
+
+        // game input
+        auto events = keyboard.toggled();
+        for( const auto &key: events) {
+            if (/*key.first == 18 && */ key.second) {
+                // any key press
+                return; // get back to main
+            }
+        }
+
+        // game logic
+        idle++;
+        if (idle > 500) {
+            return;
+        }
+
+        // game render
+        l8_left.showNumberDec(idle);
+        RGB color;
+        color.red = random(256);
+        color.green = random(256);
+        color.blue = random(256);
+        display.setPixel(random(8), random(12), color);
+        display.show();
+
+        // busy waiting loop until next frame
+        while (millis() - last_millis < 30) {
+            // busy spin loop until frame time is over
+        }
+
+    }
+}
+
 
 class Laufschrift {
     LEDDisplay &display;
     const char *image[12] = {
-    "  .....    .  .......    ......          -                                               ..      ",
-    " .......  ..  ........  ........         --                                              ..      ",
-    " ..       ..  ..    ..  ..               -                            .....          -   ..      ",
-    " ..       ..  ..    ..  .......        .     .           ..           .   .          --  ..      ",
-    " ..       ..  ..    ..   .......       ..   ...         .  .          .                          ",
-    " ..       ..  ..    ..        ..       ..   ...        .    .         .                          ",
-    " ..       ..  ..    ..        ..       ...  ...        .    .         .   -                      ",
-    " .......  ..  ........   .......       .... ...       .      .        .                  ..      ",
-    "  .....   .   .......   .......        .... ...       .      -       ..                  ..      "};
+    "  .....    .  .......    ......          -                                               yy       gggggggg     ",
+    " .......  ..  ........  ........         --                                              yy       g gggg g     ",
+    " ..       ..  ..    ..  ..               -                            ggggg          -   yy       gggggggg     ",
+    " ..       ..  ..    ..  .......        .     g           rv           g   g          |-  yy       gggggggg     ",
+    " ..       ..  ..    ..   .......       ..   ggg         w  w          g                           ggggg gg     ",
+    " ..       ..  ..    ..        ..       .g   v..        .    g         g                           gggggggg     ",
+    " ..       ..  ..    ..        ..       rg.  vrr        g    .         g   -                       gggggggg     ",
+    " .......  ..  ........   .......       rg.. vrr       .      y        g                  yy       gg ggggg     ",
+    "  .....   .   .......   .......        rg.y v..       v      -       gg                  yy       gggggggg     "};
     // CIDS Tetris:39 Pong:54 Snake:69 Flappybird:82
     const char *image2[3] = {
     " -    | ",
     "-      |",
     " -    | "};
-    const struct{char* name; int start; } games[4] = {
-        {"Tetris", 40},
-        {"Pong", 55},
-        {"Snake", 69},
-        {"Flappybird", 85},
+    const struct{char* name; int start; func prog; } games[5] = {
+        {"Tetris", 40, dummygame},
+        {"Pong", 55, dummygame},
+        {"Snake", 69, dummygame},
+        {"Flappybird", 85, dummygame},
+        {"Matrix", 99, dummygame},
     };
     int pos = 0;
     int pos2 = 0;
@@ -49,6 +94,20 @@ public:
         color.blue = 0;
         if (c == '.') {
             color.blue = 255;
+        } else if (c == 'g') {
+            color.green = 255;
+        } else if (c == 'r') {
+            color.red = 255;
+        } else if (c == 'v') {
+            color.red = 255;
+            color.blue = 255;
+        } else if (c == 'w') {
+            color.red = 255;
+            color.green = 255;
+            color.blue = 255;
+        } else if (c == 'y') {
+            color.red = 255;
+            color.green = 255;
         } else if (c == '+') {
             color.red = 255;
         } else if (c == '-') {
@@ -78,63 +137,82 @@ public:
     }
 
     void run() {
-        for (int i = 0; i < 9; i++) {
-            for (int j = 0; j < 8; j++) {
-                display.setPixel(j, 11-i, getColor(image[i][(pos/scrollduration + j) % sz]));
-            }
-        }
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 8; j++) {
-                auto color = getColor(image2[i][j]);
-                display.setPixel(j, 2-i, color);
-            }
-        }
-        display.show();
-        pos2++; // light animation
-        //l8_left.showNumberDec(pos);
+        // init all variables
+        keyboard.toggled(); // flush keyboard input
+        targetgame = -1;
+        pos = 0;
+        pos2 = 0;
+        idle = 0;
 
-        // animation logic
-        if (targetgame == -1) {
-            // scroll mode
-            pos = (pos + 1) % (scrollduration*sz);
-        } else {
-            // select mode
-            if (pos < games[targetgame].start*scrollduration) {
-                pos += scrollduration;
+        // enter main loop
+        while (true) {
+            auto last_millis = millis();
+            for (int i = 0; i < 9; i++) {
+                for (int j = 0; j < 8; j++) {
+                    display.setPixel(j, 11-i, getColor(image[i][(pos/scrollduration + j) % sz]));
+                }
             }
-            if (pos > games[targetgame].start*scrollduration) {
-                pos -= scrollduration;
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 8; j++) {
+                    auto color = getColor(image2[i][j]);
+                    display.setPixel(j, 2-i, color);
+                }
             }
-        }
-        idle++;
-        if (idle > 500 && targetgame != -1) {
-            idle = 0;
-            targetgame = -1;
-        }
+            display.show();
+            pos2++; // light animation
+            //l8_left.showNumberDec(pos);
 
-        // key press logic
-        auto events = keyboard.toggled();
-        int ngames = sizeof(games) / sizeof(games[0]);
-        for( const auto &key: events) {
-            l8_left.showNumberDec(key.first);
-            l8_right.showNumberDec(key.second);
-            if (key.first == 18 && key.second) {
-                if (targetgame == -1) {
-                    targetgame = ngames - 1;
-                } else if (targetgame > 0) {
-                    targetgame--;
+            // animation logic
+            if (targetgame == -1) {
+                // scroll mode
+                pos = (pos + 1) % (scrollduration*sz);
+            } else {
+                // select mode
+                if (pos < games[targetgame].start*scrollduration) {
+                    pos += scrollduration;
                 }
-                idle = 0;
+                if (pos > games[targetgame].start*scrollduration) {
+                    pos -= scrollduration;
+                }
             }
-            if (key.first == 21 && key.second) {
-                if (targetgame == -1) {
-                    targetgame = 0;
-                } else if (targetgame < ngames - 1) {
-                    targetgame++;
-                }
+            idle++;
+            if (idle > 500 && targetgame != -1) {
                 idle = 0;
+                targetgame = -1;
+            }
+
+            // key press logic
+            auto events = keyboard.toggled();
+            int ngames = sizeof(games) / sizeof(games[0]);
+            for( const auto &key: events) {
+                l8_left.showNumberDec(key.first);
+                l8_right.showNumberDec(key.second);
+                if (key.first == 18 && key.second) {
+                    if (targetgame == -1) {
+                        targetgame = ngames - 1;
+                    } else if (targetgame > 0) {
+                        targetgame--;
+                    }
+                    idle = 0;
+                }
+                if (key.first == 21 && key.second) {
+                    if (targetgame == -1) {
+                        targetgame = 0;
+                    } else if (targetgame < ngames - 1) {
+                        targetgame++;
+                    }
+                    idle = 0;
+                }
+                if (targetgame != -1 && (key.first == 22 || key.first == 23) && key.second) {
+                    // start game
+                    games[targetgame].prog();
+                    return; // restart main
+                }
+            }
+            //l8_right.showNumberDec(events.size());
+            while (millis() - last_millis < 30) {
+                // busy spin loop
             }
         }
-        //l8_right.showNumberDec(events.size());
     }
 };
