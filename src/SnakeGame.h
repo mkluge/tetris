@@ -93,17 +93,16 @@ class SnakeGame
         }
         void moveSnake(Position nextSnakePos, bool lengtheningSnake) {
             // Reset last Pixel
-            if(!lengtheningSnake)
-            {
-                this->snakeMatrix[this->mySnake[this->currentSnakeLength - 1].x]
+            this->snakeMatrix[this->mySnake[this->currentSnakeLength - 1].x]
                     [this->mySnake[this->currentSnakeLength - 1].y].reset();
-            }
+
 
             // Move other pieces of the Snake a pixel further
-            for(int i = 0; i < (this->currentSnakeLength - 1); i++)
+            int i = this->currentSnakeLength - 1;
+            for(; i > 0; i--)
             {
-                this->mySnake[i + 1].x = this->mySnake[i].x;
-                this->mySnake[i + 1].y = this->mySnake[i].y;
+                this->mySnake[i].x = this->mySnake[i - 1].x;
+                this->mySnake[i].y = this->mySnake[i - 1].y;
                 this->snakeMatrix[this->mySnake[i + 1].x]
                     [this->mySnake[i + 1].y].age();
             }
