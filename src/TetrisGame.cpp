@@ -4,7 +4,6 @@
 TetrisGame::TetrisGame(LEDDisplay &display, int width, int height, TM1637Display &point_leds)
     : display(display), width(width), height(height), point_leds(point_leds)
 {
-    start();
 }
 
 TetrisGame::~TetrisGame()
@@ -18,6 +17,7 @@ void TetrisGame::start()
     falling = new TetrisPiece(display);
     timer_interval = 700;
     points = 0;
+    last_millis = 0;
 }
 
 void TetrisGame::stop() {}
@@ -70,11 +70,6 @@ void TetrisGame::onKey(const Keyboard::key_state_map_t &keys)
     display.show();
 }
 
-Animation *TetrisGame::createPiece()
-{
-    return new TetrisPiece(display);
-}
-
 /**
  * animate is called as often as possible
  */
@@ -83,7 +78,7 @@ void TetrisGame::animate()
     // get the current millis, get the diff and
     // figure out, if we need to do a step
     unsigned millies = millis();
-    auto diff = last_millis - millies;
+    auto diff = millies - last_millis;
     if (diff >= timer_interval)
     {
         // OK, make a step
@@ -125,7 +120,6 @@ void TetrisGame::animate()
             falling->useCachePixels();
             falling->paint();
         }
-        display.show();
         // store time of last action
         last_millis = millies;
         // decrease delay between steps
@@ -134,5 +128,6 @@ void TetrisGame::animate()
         {
             timer_interval--;
         }
+        display.show();
     }
 }

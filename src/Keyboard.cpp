@@ -50,7 +50,7 @@ void Keyboard::addKey(int id, int pin)
     keys[id] = pin;
     // store initial "LOW" for each key
     old_state[id]=false;
-    attachInterrupt(pin, isr, FALLING);
+    attachInterrupt(pin, isr, CHANGE);
 //    interrupts();
 }
 

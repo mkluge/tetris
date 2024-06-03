@@ -3,7 +3,7 @@
 
 #include <Animation.h>
 #include <Basics.h>
-#include <list>
+#include <vector>
 
 #pragma once
 
@@ -14,7 +14,7 @@ public:
   int removeFullLines();
   void removeLine(int line);
 
-  const std::list<PixelList> pieceTemplates = {
+  const std::vector<PixelList> pieceTemplates = {
       // yellow rectangle
       {{-1, 0, TYELLOW}, {0, 0, TYELLOW}, {-1, -1, TYELLOW}, {0, -1, TYELLOW}},
       // blue bar

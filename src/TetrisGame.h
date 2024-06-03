@@ -23,9 +23,6 @@ public:
     void animate();
 
 private:
-    Animation *createPiece();
-
-private:
     LEDDisplay &display;
     int width;
     int height;

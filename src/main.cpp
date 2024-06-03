@@ -84,6 +84,8 @@ void setup()
   pinMode(BUTTON_RIGHT_LED, OUTPUT);
   digitalWrite(BUTTON_LEFT_LED, 0);
   digitalWrite(BUTTON_RIGHT_LED, 0);
+  tetris.start();
+  Serial.begin(115000);
 }
 
 void loop()

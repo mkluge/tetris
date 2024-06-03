@@ -7,11 +7,13 @@ TetrisPiece::TetrisPiece(LEDDisplay &display) : Animation(display)
 {
     int avail_pieces = pieceTemplates.size();
     variant = esp_random() % avail_pieces;
+    // add pixels
+    addPixels(pieceTemplates[variant]);
     // calculate offset_x and offset_y so that piece
     // starts at the top of the screen and in the middle
     auto bBox = boundingBox();
     offset_x = (display_width/2) - ((bBox.end_x - bBox.start_x) / 2); 
-    offset_y = -bBox.end_y;
+    offset_y = display.height() - bBox.end_y;
 }
 
 TetrisPiece::~TetrisPiece()

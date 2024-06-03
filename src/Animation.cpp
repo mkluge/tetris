@@ -5,6 +5,8 @@ Animation::Animation(LEDDisplay &display) : display(display)
 {
     display_width = display.width();
     display_height = display.height();
+    offset_x = 0;
+    offset_y = 0;
 }
 
 /***
@@ -150,23 +152,25 @@ void Animation::useCachePixels()
 const Rect Animation::boundingBox() const
 {
     struct Rect retval = {display.width(), display.height(), 0, 0};
-    for (auto &pixel : internal_pixels)
+    for (const auto &pixel : internal_pixels)
     {
-        if (pixel.x < retval.start_x)
+        int x = pixel.x + offset_x;
+        int y = pixel.y + offset_y;
+        if ( x < retval.start_x)
         {
             retval.start_x = pixel.x;
         }
-        if (pixel.y < retval.start_y)
+        if ( y < retval.start_y)
         {
-            retval.start_y = pixel.y;
+            retval.start_y = y;
         }
-        if (pixel.x > retval.end_x)
+        if ( x > retval.end_x)
         {
-            retval.end_x = pixel.x;
+            retval.end_x = x;
         }
-        if (pixel.y > retval.end_y)
+        if ( y > retval.end_y)
         {
-            retval.end_y = pixel.y;
+            retval.end_y = y;
         }
     }
     return retval;
