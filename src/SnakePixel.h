@@ -14,6 +14,11 @@ class SnakePixel {
         };
         SnakePixel()
         {
+            this->reset();
+        }
+        void reset()
+        {
+            this->myType = SnakePixel::SNAKE_OBJECT_TYPE::EMPTY;
             this->lastPixelColor.red = 0;
             this->lastPixelColor.green = 0;
             this->lastPixelColor.blue = 0;
@@ -28,27 +33,32 @@ class SnakePixel {
        }
        void age()
        {
-            this->pixelAge++;
+            this->pixelAge += 1.0;
        }
        RGB getColor()
        {
 
             switch(this->myType)
             {
-                case SnakePixel::SNAKE_OBJECT_TYPE::SNAKE:
+                case SNAKE:
                     this->lastPixelColor.red = 0;
                     this->lastPixelColor.green = 255;
                     this->lastPixelColor.blue = 0;
                     break;
-                case SnakePixel::SNAKE_OBJECT_TYPE::FOOD:
+                case FOOD:
                     this->lastPixelColor.red = 176;
                     this->lastPixelColor.green = 176;
                     this->lastPixelColor.blue = 0;
                     break;
-                case SnakePixel::SNAKE_OBJECT_TYPE::WALL:
+                case WALL:
                     this->lastPixelColor.red = 0;
                     this->lastPixelColor.green = 0;
                     this->lastPixelColor.blue = 255;
+                    break;
+                case EMPTY:
+                    this->lastPixelColor.red = 0;
+                    this->lastPixelColor.green = 0;
+                    this->lastPixelColor.blue = 0;
                     break;
             }
             // TODO: Also factor in pixelAge and modifier
