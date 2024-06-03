@@ -129,6 +129,16 @@ class SnakeGame
                 }
             }
         }
+        void applyFoodIfFound(Position nexSnakePos) {
+            // TODO: implement
+        }
+        bool doesSnakeCollideAtPos(Position nextSnakePos) {
+            // TODO implement
+            //switch() {
+
+            //}
+            return false;
+        }
         bool snakeGameEngine() {
             this->applyKeyboardInputs();
 
@@ -136,7 +146,14 @@ class SnakeGame
             if(0 == (this->counter % 6)) // be a little slower
             {
                 Position nextSnakePos = this->calculateSnakeDirection();
-                this->moveSnake(nextSnakePos);
+                this->applyFoodIfFound(nextSnakePos);
+                if(!this->doesSnakeCollideAtPos(nextSnakePos))
+                {
+                    this->moveSnake(nextSnakePos);
+                } else
+                {
+                    renderBlood();
+                }
             }
 
             // TODO: fill snakeMatrix (and it's color)
