@@ -35,6 +35,10 @@ class SnakePixel {
        {
             this->pixelAge += 1.0;
        }
+       SNAKE_OBJECT_TYPE getType()
+       {
+            return this->myType;
+       }
        RGB getColor()
        {
 

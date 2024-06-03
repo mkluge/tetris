@@ -133,10 +133,12 @@ class SnakeGame
             // TODO: implement
         }
         bool doesSnakeCollideAtPos(Position nextSnakePos) {
-            // TODO implement
-            //switch() {
-
-            //}
+            switch(this->snakeMatrix[nextSnakePos.x][nextSnakePos.y].getType()) {
+                case SnakePixel::SNAKE_OBJECT_TYPE::WALL:
+                case SnakePixel::SNAKE_OBJECT_TYPE::SNAKE:
+                    return true;
+                    // pass otherwise
+            }
             return false;
         }
         bool snakeGameEngine() {
@@ -150,9 +152,11 @@ class SnakeGame
                 if(!this->doesSnakeCollideAtPos(nextSnakePos))
                 {
                     this->moveSnake(nextSnakePos);
-                } else
+                } else  // Collision
                 {
+                    // Game-Over
                     renderBlood();
+                    return true;
                 }
             }
 
