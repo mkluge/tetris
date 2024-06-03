@@ -109,7 +109,23 @@ class SnakeGame
                 0.0);
         }
         bool snakeGameEngine() {
-            // TODO: Do magic stuff here (i.e. calculate frame)
+            // keyboard events
+            for( const auto &key: keyboard.toggled()) {
+                if (key.first == 18 && key.second && this->currentSnakeDirection != SnakeGame::SNAKE_DIRECTION::RIGHT) {
+                    this->currentSnakeDirection = SnakeGame::SNAKE_DIRECTION::LEFT;
+                }
+                if (key.first == 21 && key.second && this->currentSnakeDirection != SnakeGame::SNAKE_DIRECTION::LEFT) {
+                    this->currentSnakeDirection = SnakeGame::SNAKE_DIRECTION::RIGHT;
+                }
+                if (key.first == 19 && key.second && this->currentSnakeDirection != SnakeGame::SNAKE_DIRECTION::DOWN) {
+                    this->currentSnakeDirection = SnakeGame::SNAKE_DIRECTION::UP;
+                }
+                if (key.first == 3 && key.second && this->currentSnakeDirection != SnakeGame::SNAKE_DIRECTION::UP) {
+                    this->currentSnakeDirection = SnakeGame::SNAKE_DIRECTION::DOWN;
+                }
+            }
+
+            // snake simulation
             if(0 == (this->counter % 6)) // be a little slower
             {
                 Position nextSnakePos = this->calculateSnakeDirection();
