@@ -55,8 +55,6 @@ Plasma<PIXELS_X, PIXELS_Y> plasma(display);
 #include <Laufschrift.h>
 Laufschrift laufschrift(display);
 
-#define ANIMATION plasma
-
 void setup()
 {
   display.start();
@@ -76,7 +74,6 @@ void setup()
   pinMode(BUTTON_RIGHT_LED, OUTPUT);
   digitalWrite(BUTTON_LEFT_LED, 0);
   digitalWrite(BUTTON_RIGHT_LED, 0);
-  //ANIMATION.init();
 }
 
 void loop()
