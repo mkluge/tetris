@@ -2,6 +2,7 @@
 #define SNAKE_PIXEL_H
 
 #include <LEDDisplay.h>
+#include <math.h>
 
 class SnakePixel {
    public:
@@ -46,7 +47,9 @@ class SnakePixel {
             {
                 case SNAKE:
                     this->lastPixelColor.red = 0;
-                    this->lastPixelColor.green = 255;
+                    this->lastPixelColor.green = 127;
+                    // APPLY age of snake elements
+                    this->lastPixelColor.green += pow(0.99, this->pixelAge) * 127;
                     this->lastPixelColor.blue = 0;
                     break;
                 case FOOD:

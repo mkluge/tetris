@@ -65,8 +65,8 @@ class SnakeGame
                 case SNAKE_DIRECTION::LEFT:
                     nextSnakePos.x--;
                     // Out of Bounds: Left side
-                    if(0 > nextSnakePos.y)
-                        nextSnakePos.y = size_x - 1;
+                    if(0 > nextSnakePos.x)
+                        nextSnakePos.x = size_x - 1;
                     break;
                 case SNAKE_DIRECTION::RIGHT:
                     nextSnakePos.x++;
