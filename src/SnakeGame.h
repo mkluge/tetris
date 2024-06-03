@@ -33,9 +33,9 @@ class SnakeGame
                 for(int x_index = 0; x_index < size_x; x_index++)
                     this->snakeMatrix[x_index][y_index].reset();
             // Add Wall:
-            for(int y_index = 0; y_index < size_y; y_index++)
+            for(int x_index = 2; x_index < size_x-2; x_index++)
             {
-                this->snakeMatrix[size_x - 1][y_index].setPixel(
+                this->snakeMatrix[x_index][size_y - 3].setPixel(
                     SnakePixel::SNAKE_OBJECT_TYPE::WALL,
                     0.0,
                     0.0
@@ -171,7 +171,7 @@ class SnakeGame
     private:
         LEDDisplay &display;
         SnakePixel snakeMatrix[size_x][size_y];
-        static const int MAX_SNAKE_LENGTH = 100;
+        static const int MAX_SNAKE_LENGTH = size_x*size_y;
         int currentSnakeLength = 0;
         SnakeGame::SNAKE_DIRECTION currentSnakeDirection = SnakeGame::SNAKE_DIRECTION::RIGHT;
         Position mySnake[MAX_SNAKE_LENGTH];
