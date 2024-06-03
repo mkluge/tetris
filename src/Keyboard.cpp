@@ -36,7 +36,7 @@ void Keyboard::addKey(int id, int pin)
 //    noInterrupts();
     keys[id] = pin;
     old_state[id]=false;
-    attachInterrupt(pin, isr, FALLING);
+    attachInterrupt(pin, isr, CHANGE);
 //    interrupts();
 }
 
