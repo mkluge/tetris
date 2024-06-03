@@ -32,6 +32,12 @@ class SnakeGame
             for(int y_index = 0; y_index < size_y; y_index++)
                 for(int x_index = 0; x_index < size_x; x_index++)
                     this->snakeMatrix[x_index][y_index].reset();
+            // DEBUG:
+            this->snakeMatrix[size_x - 1][size_y - 2].setPixel(
+                SnakePixel::SNAKE_OBJECT_TYPE::WALL,
+                0.0,
+                0.0
+            );
             for(int i = 0; i < MAX_SNAKE_LENGTH; i++)
             {
                 this->mySnake[i][0] = 0;
@@ -43,9 +49,9 @@ class SnakeGame
             this->currentSnakeDirection = SnakeGame::SNAKE_DIRECTION::RIGHT;
 
             this->mySnake[0][0] = 1;
-            this->mySnake[0][1] = size_y / 2;
+            this->mySnake[0][1] = size_y / 2 - 1;
             this->mySnake[1][0] = 0;
-            this->mySnake[1][1] = size_y / 2;
+            this->mySnake[1][1] = size_y / 2 - 1;
             //Serial.begin(9600);
             //Serial.println("Hello World");
         }
@@ -61,21 +67,24 @@ class SnakeGame
                     // Out of Bounds: Left side
                     if(0 > nextSnakePos.y)
                         nextSnakePos.y = size_x - 1;
+                    break;
                 case SNAKE_DIRECTION::RIGHT:
                     nextSnakePos.x++;
                     // Out of Bounds: Right side
                     if(size_x >= nextSnakePos.x)
                         nextSnakePos.x = 0;
+                    break;
                 case SNAKE_DIRECTION::UP:
                     nextSnakePos.y++;
                     // Out of Bounds: Top
                     if(size_y >= nextSnakePos.y)
-                    nextSnakePos.y = 0;
+                        nextSnakePos.y = 0;
+                    break;
                 case SNAKE_DIRECTION::DOWN:
                     nextSnakePos.y--;
                     // Out of Bounds: Bottom
                     if(0 > nextSnakePos.y)
-                      nextSnakePos.y = size_y - 1;
+                        nextSnakePos.y = size_y - 1;
                     break;
             }
             return nextSnakePos;
@@ -86,17 +95,17 @@ class SnakeGame
                 [this->mySnake[this->currentSnakeLength - 1][1]].reset();
 
             // Move other pieces of the Snake a pixel further
-            for(int i = 0; i < this->currentSnakeLength - 1; i++)
+            for(int i = 0; i < (this->currentSnakeLength - 1); i++)
             {
                 this->mySnake[i + 1][0] = this->mySnake[i][0];
                 this->mySnake[i + 1][1] = this->mySnake[i][1];
-                this->snakeMatrix[this->mySnake[i][0]]
-                    [this->mySnake[i][1]].age();
+                this->snakeMatrix[this->mySnake[i + 1][0]]
+                    [this->mySnake[i + 1][1]].age();
             }
 
+            // Set the beginning of the Snake
             this->mySnake[0][0] = nextSnakePos.x;
             this->mySnake[0][1] = nextSnakePos.y;
-
             this->snakeMatrix[this->mySnake[0][0]]
                 [this->mySnake[0][1]].setPixel(
                 SnakePixel::SNAKE_OBJECT_TYPE::SNAKE,
@@ -117,11 +126,11 @@ class SnakeGame
         void paint() {
             this->snakeGameEngine();
 
-            int x = 0,
-                y = 0;
+
             for(int y_index = 0; y_index < size_y; y_index++)
               for(int x_index = 0; x_index < size_x; x_index++)
-                display.setPixel(x, y, this->snakeMatrix[x_index][y_index].getColor());
+                display.setPixel(x_index, y_index, this->snakeMatrix[x_index][y_index].getColor());
+                //display.setPixel(x_index, y_index, {192, 64, 64});
             display.show();
             //Serial.println("Lars.");
         }
