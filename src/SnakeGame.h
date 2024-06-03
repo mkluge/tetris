@@ -136,6 +136,7 @@ class SnakeGame
                 this->currentSnakeLength++;
                 return !this->placeNewFood();
             }
+            return false;
         }
         bool placeNewFood() {
             int tries = 0;
