@@ -2,12 +2,13 @@
 #define NEO_H
 
 #include <Arduino.h>
-#include <LEDDisplay.h>
 #include <array>
 #include <map>
 #include <FastTrig.h>
 #include <math.h>
 #pragma once
+
+
 
 template <int size_x, int size_y>
 class Neo
@@ -58,11 +59,11 @@ public:
 
     void paint()
     {
-        for (auto i = 0; i < size_y/2; i++)
+        for (auto i = 0; i < size_x; i++)
         {
-            int x = int(rand() % size_x);
-            auto xc = (rand() % 255) - 255;
-            for (auto y = 0; y < size_y/i; y++)
+            int x = random(size_x);
+            auto xc = random(255) - 255;
+            for (auto y = 0; y < size_y; y++)
             {
                 display.setPixel(x, y, calculateNeoColor2(xc, y, neo_time));
             }
@@ -75,5 +76,42 @@ private:
     LEDDisplay &display;
     double neo_time, speed;
 };
+
+void run_neo() {
+    // initialization
+    int idle = 0;
+
+    Neo<8, 12> game(display);
+    game.init();
+
+    // main loop
+    while (true) {
+        int last_millis = millis();
+        
+        // input
+        auto events = keyboard.toggled();
+        for( const auto &key: events) {
+            if (/*key.first == 18 && */ key.second) {
+                // any key press
+                return; // get back to main
+            }
+        }
+
+        // game logic
+        idle++;
+        if (idle > 2000) {
+            return;
+        }
+
+        // game render
+        game.paint();
+
+        // busy waiting loop until next frame
+        while (millis() - last_millis < 30) {
+            // busy spin loop until frame time is over
+        }
+
+    }
+}
 
 #endif

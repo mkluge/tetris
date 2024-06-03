@@ -8,6 +8,7 @@ inline int MIN(int a, int b) { return((a) < (b) ? a : b); }
 typedef void(*func)();
 
 #include "SpaceShooter.h"
+#include "Neo.h"
 
 
 // reference implementation for an empty game
@@ -74,7 +75,7 @@ class Laufschrift {
         {"Pong", 55, dummygame},
         {"Snake", 69, dummygame},
         {"Flappybird", 85, dummygame},
-        {"Matrix", 99, dummygame},
+        {"Matrix", 99, run_neo},
         {"Spaceshooter", 111, spaceshooter},
     };
     int pos = 0;
