@@ -121,30 +121,8 @@ void spaceshooter() {
                     // lose animation if it->x == shipx+-1
                     if (it->x >= shipx - 1 && it->x <= shipx+1) {
                         // you lose
-                        int idle = 0;
-                        while (true) {
-                            int last_millis = millis();
-                            // game logic
-                            idle++;
-                            if (idle > 500) {
-                                return; // end the game for all
-                            }
-
-                            // blood render
-                            l8_left.showNumberDec(idle);
-                            RGB color;
-                            color.red = random(256);
-                            color.green = 0;
-                            color.blue = 0;
-                            display.setPixel(random(8), random(12), color);
-                            display.show();
-
-                            // busy waiting loop until next frame
-                            while (millis() - last_millis < 30) {
-                                // busy spin loop until frame time is over
-                            }
-
-                        }
+                        renderBlood();
+                        return;
                     }
                     it = enemies.erase(it);
                 } else {
