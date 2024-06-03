@@ -32,12 +32,15 @@ class SnakeGame
             for(int y_index = 0; y_index < size_y; y_index++)
                 for(int x_index = 0; x_index < size_x; x_index++)
                     this->snakeMatrix[x_index][y_index].reset();
-            // DEBUG:
-            this->snakeMatrix[size_x - 1][size_y - 2].setPixel(
-                SnakePixel::SNAKE_OBJECT_TYPE::WALL,
-                0.0,
-                0.0
-            );
+            // Add Wall:
+            for(int y_index = 0; y_index < size_y; y_index++)
+            {
+                this->snakeMatrix[size_x - 1][y_index].setPixel(
+                    SnakePixel::SNAKE_OBJECT_TYPE::WALL,
+                    0.0,
+                    0.0
+                );
+            }
             for(int i = 0; i < MAX_SNAKE_LENGTH; i++)
             {
                 this->mySnake[i] = {0, 0};
@@ -108,7 +111,8 @@ class SnakeGame
                 0.0,
                 0.0);
         }
-        bool snakeGameEngine() {
+        void applyKeyboardInputs()
+        {
             // keyboard events
             for( const auto &key: keyboard.toggled()) {
                 if (key.first == 18 && key.second && this->currentSnakeDirection != SnakeGame::SNAKE_DIRECTION::RIGHT) {
@@ -124,6 +128,9 @@ class SnakeGame
                     this->currentSnakeDirection = SnakeGame::SNAKE_DIRECTION::DOWN;
                 }
             }
+        }
+        bool snakeGameEngine() {
+            this->applyKeyboardInputs();
 
             // snake simulation
             if(0 == (this->counter % 6)) // be a little slower
