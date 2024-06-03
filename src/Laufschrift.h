@@ -7,6 +7,8 @@ inline int MIN(int a, int b) { return((a) < (b) ? a : b); }
 
 typedef void(*func)();
 
+#include "SpaceShooter.h"
+
 
 // reference implementation for an empty game
 void dummygame() {
@@ -53,26 +55,27 @@ void dummygame() {
 class Laufschrift {
     LEDDisplay &display;
     const char *image[12] = {
-    "  .....    .  .......    ......          -                                               yy       gggggggg     ",
-    " .......  ..  ........  ........         --                                              yy       g gggg g     ",
-    " ..       ..  ..    ..  ..               -                            ggggg          -   yy       gggggggg     ",
-    " ..       ..  ..    ..  .......        .     g           rv           g   g          |-  yy       gggggggg     ",
-    " ..       ..  ..    ..   .......       ..   ggg         w  w          g                           ggggg gg     ",
-    " ..       ..  ..    ..        ..       .g   v..        .    g         g                           gggggggg     ",
-    " ..       ..  ..    ..        ..       rg.  vrr        g    .         g   -                       gggggggg     ",
-    " .......  ..  ........   .......       rg.. vrr       .      y        g                  yy       gg ggggg     ",
-    "  .....   .   .......   .......        rg.y v..       v      -       gg                  yy       gggggggg     "};
+    "  .....    .  .......    ......          -                                               yy       gggggggg                ",
+    " .......  ..  ........  ........         --                                              yy       g gggg g      g .     g ",
+    " ..       ..  ..    ..  ..               -                            ggggg          -   yy       gggggggg           y    ",
+    " ..       ..  ..    ..  .......        .     g           rv           g   g          |-  yy       gggggggg     v  |       ",
+    " ..       ..  ..    ..   .......       ..   ggg         w  w          g                           ggggg gg             g  ",
+    " ..       ..  ..    ..        ..       .g   v..        .    g         g                           gggggggg        -       ",
+    " ..       ..  ..    ..        ..       rg.  vrr        g    .         g   -                       gggggggg                ",
+    " .......  ..  ........   .......       rg.. vrr       .      y        g                  yy       gg ggggg        w       ",
+    "  .....   .   .......   .......        rg.y v..       v      -       gg                  yy       gggggggg       www      "};
     // CIDS Tetris:39 Pong:54 Snake:69 Flappybird:82
     const char *image2[3] = {
     " -    | ",
     "-      |",
     " -    | "};
-    const struct{char* name; int start; func prog; } games[5] = {
+    const struct{char* name; int start; func prog; } games[6] = {
         {"Tetris", 40, dummygame},
         {"Pong", 55, dummygame},
         {"Snake", 69, dummygame},
         {"Flappybird", 85, dummygame},
         {"Matrix", 99, dummygame},
+        {"Spaceshooter", 111, spaceshooter},
     };
     int pos = 0;
     int pos2 = 0;
@@ -204,6 +207,37 @@ public:
                     idle = 0;
                 }
                 if (targetgame != -1 && (key.first == 22 || key.first == 23) && key.second) {
+                    // blend-over animation
+                    int idle = 0;
+
+                    // main loop
+                    for (int row = 11; row >= 0; row--) {
+                        for (int brightness = 250; brightness >= 0; brightness-= 50) {
+                            int last_millis = millis();
+
+                            // game logic
+                            idle++;
+
+                            // game render
+                            l8_left.showNumberDec(idle);
+                            RGB color;
+                            color.red = 255;
+                            color.green = 255;
+                            color.blue = 255;
+                            for (int col = 0; col < 8; col++) {
+                                display.setPixel(col, row, blendColor(color, brightness));
+                            }
+                            display.show();
+
+                            // busy waiting loop until next frame
+                            while (millis() - last_millis < 10) {
+                                // busy spin loop until frame time is over
+                            }
+                        }
+                    }
+                    display.clear();
+                    display.show();
+                    keyboard.toggled(); // flush all keyboard events
                     // start game
                     games[targetgame].prog();
                     return; // restart main
