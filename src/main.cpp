@@ -8,6 +8,7 @@
 #include <SteinScherePapier.h>
 #include <Mandelbrot.h>
 #include <Plasma.h>
+#include <SnakeGame.h>
 
 // Module connection pins (Digital Pins)
 #define CLK_LEFT_LED 27
@@ -52,8 +53,9 @@ Keyboard keyboard = Keyboard();
 SteinScherePapier<PIXELS_X, PIXELS_Y> ssp(display);
 Mandelbrot<PIXELS_X, PIXELS_Y> mandelbrot(display);
 Plasma<PIXELS_X, PIXELS_Y> plasma(display);
+SnakeGame<PIXELS_X, PIXELS_Y> snake(display);
 
-#define ANIMATION plasma
+#define ANIMATION snake
 
 void sspThread();
 void animationThread();
