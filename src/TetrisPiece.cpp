@@ -14,6 +14,8 @@ TetrisPiece::TetrisPiece(LEDDisplay &display) : Animation(display)
     auto bBox = boundingBox();
     offset_x = (display_width/2) - ((bBox.end_x - bBox.start_x) / 2); 
     offset_y = display.height() - bBox.end_y;
+    Serial.printf("offset x: %d\n", offset_x);
+    Serial.printf("offset y: %d\n", offset_y);
 }
 
 TetrisPiece::~TetrisPiece()
