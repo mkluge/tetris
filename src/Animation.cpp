@@ -1,4 +1,5 @@
 #include "Animation.h"
+#include <Arduino.h>
 #include <esp_random.h>
 
 Animation::Animation(LEDDisplay &display) : display(display)
@@ -90,10 +91,14 @@ bool Animation::canTranslate(int x, int y, Animation *mayCrashInto)
         // now check conditions
         if (pixelOutsideScreen(x, y))
         {
+            Serial.println(x);
+            Serial.println(y);
+            Serial.println("outside");
             return false;
         }
         if (pixelInside( x, y, mayCrashInto))
         {
+            Serial.println("crash");
             return false;
         }
         cache_pixels.push_back({x, y, pixel.color});
@@ -149,8 +154,8 @@ const Rect Animation::boundingBox() const
     struct Rect retval = {display.width(), display.height(), 0, 0};
     for (const auto &pixel : internal_pixels)
     {
-        int x = pixel.x + offset_x;
-        int y = pixel.y + offset_y;
+        int x = pixel.x;
+        int y = pixel.y;
         if ( x < retval.start_x)
         {
             retval.start_x = pixel.x;
