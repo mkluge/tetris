@@ -98,12 +98,12 @@ class Laufschrift {
     " -    | ",
     "-      |",
     " -    | "};
-    const struct{char* name; int start; func prog; } games[6] = {
-        {"Tetris", 40, dummygame},
-        {"Pong", 55, dummygame},
+    const struct{char* name; int start; func prog; } games[2] = {
+        //{"Tetris", 40, dummygame},
+        //{"Pong", 55, dummygame},
         {"Snake", 69, run_snake},
-        {"Flappybird", 85, dummygame},
-        {"Matrix", 99, run_neo},
+        //{"Flappybird", 85, dummygame},
+        //{"Matrix", 99, run_neo},
         {"Spaceshooter", 111, spaceshooter},
     };
     int pos = 0;

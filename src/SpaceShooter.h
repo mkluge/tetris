@@ -70,11 +70,11 @@ void spaceshooter() {
                     shots.push_back(std::pair<int, int>(shipx, 1));
                 }
             }
-            if (key.first == 18 && key.second && shipx > 1) {
+            if (key.first == 18 && key.second && shipx > 0) {
                 // move left
                 shipx--;
             }
-            if (key.first == 21 && key.second && shipx < 6) {
+            if (key.first == 21 && key.second && shipx < 7) {
                 // move right
                 shipx++;
             }
@@ -155,9 +155,9 @@ void spaceshooter() {
         color.green = 255;
         color.blue = 255;
         // render ship
-        display.setPixel(shipx-1, 0, color);
+        if (shipx > 0) display.setPixel(shipx-1, 0, color);
+        if (shipx < 7) display.setPixel(shipx+1, 0, color);
         display.setPixel(shipx, 0, color);
-        display.setPixel(shipx+1, 0, color);
         display.setPixel(shipx, 1, color);
         // render shots
         for (auto &shot: shots) {
