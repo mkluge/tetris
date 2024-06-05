@@ -29,32 +29,35 @@ public:
   int removeFullLines() {
     int removed_lines = 0;
     // from the bottom up remove all full lines
+    int piecesPerLine[display_height];
+    for (int line = 0; line < display_height; line++) {
+      piecesPerLine[line] = 0;
+    }
+    for (const auto &pixel : internal_pixels) {
+      auto x = offset_x + pixel.x;
+      auto y = offset_y + pixel.y;
+      if (x < 0 || x >= display_width || y < 0 || y >= display_width) {
+        Serial.println("buggy pixel");
+      }
+      piecesPerLine[y]++;
+    }
+    for (int line = display_height - 1; line >= 0; line--) {
+      Serial.printf("Line: %2d, Pieces: %1d\n", line, piecesPerLine[line]);
+    }
+    // removing starts from the top
     for (int line = display_height - 1; line >= 0; line--) {
       // count pieces in all lines
-      int piecesPerLine[display_height];
-      for (const auto &pixel : internal_pixels) {
-        auto x = offset_x + pixel.x;
-        auto y = offset_y + pixel.y;
-
-        if (x < 0 || x >= display_width || y < 0 || y >= display_width) {
-          // shall not happen, but ...
-          continue;
-        }
-        piecesPerLine[y]++;
-      }
-      if (piecesPerLine[line] == (display_width - 1)) {
+      if (piecesPerLine[line] == display_width) {
         removed_lines++;
         removeLine(line);
-        // we need to check the same line again
-        // FIXME
-        line++;
       }
     }
     return removed_lines;
   }
 
   /**
-   * all lines bigger than the selected one is moved one up
+   * all lines bigger than the selected one is moved one done
+   * on the screen
    */
   void removeLine(int line) {
     std::list<Pixel> new_pixels;

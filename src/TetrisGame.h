@@ -26,6 +26,7 @@ public:
     falling = new TetrisPiece(display);
     timer_interval = 700;
     points = 0;
+    point_leds.showNumberDec(points);
     last_millis = millis();
   }
 
@@ -33,6 +34,7 @@ public:
 
   void onKey(const Keyboard::key_state_map_t &keys) {
     int x_translate = 0;
+    bool rotated = false;
     for (const auto &entry : keys) {
       const int key = entry.first;
       const int presses = entry.second;
@@ -58,11 +60,12 @@ public:
           falling->paint();
         }
       }
-      if ((key == L_PUSH_PIN || key == R_PUSH_PIN) && presses > 0) {
+      if ((key == L_PUSH_PIN || key == R_PUSH_PIN) && presses > 0 && !rotated) {
         if (falling->canRotate(floor)) {
           falling->unpaint();
           falling->useCachePixels();
           falling->paint();
+          rotated = true;
         }
       }
     }
@@ -97,6 +100,7 @@ public:
           }
         }
         // merge falling into floor
+        floor->unpaint();
         floor->addPixels(falling->getPixels());
         // check for complete rows
         // future: funny animation for full row removal
