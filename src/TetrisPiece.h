@@ -22,6 +22,8 @@ public:
     auto bBox = boundingBox();
     offset_x = (display_width / 2) - ((bBox.end_x - bBox.start_x) / 2);
     offset_y = display.height() - bBox.end_y;
+    center_x = pieceTemplateCenter[variant].x;
+    center_y = pieceTemplateCenter[variant].y;
   }
 
   ~TetrisPiece() {}
@@ -89,6 +91,22 @@ private:
       {{0, 1, TPINK}, {0, 0, TPINK}, {0, -1, TPINK}, {-1, -1, TPINK}},
       // brown t
       {{-1, 0, TBROWN}, {0, 0, TBROWN}, {1, 0, TBROWN}, {0, -1, TBROWN}},
+  };
+  const std::vector<Pixel> pieceTemplateCenter = { // fixed point scale=0.5
+      // yellow rectangle
+      {-1, -1, TYELLOW},
+      // blue bar
+      {1, 3},
+      // red s
+      {0, 0, TRED},
+      // green z
+      {0, 0, TGREEN},
+      // orange l
+      {0, 0, TORANGE},
+      // pink j
+      {0, 0, TPINK},
+      // brown t
+      {0, 0, TBROWN},
   };
 };
 

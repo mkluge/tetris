@@ -51,13 +51,13 @@ public:
       int pixely = pixel.y + y;
       // now check conditions
       if (pixelOutsideScreen(pixelx, pixely)) {
-        Serial.println(pixelx);
-        Serial.println(pixely);
-        Serial.println("outside");
+        //Serial.println(pixelx);
+        //Serial.println(pixely);
+        //Serial.println("outside");
         return false;
       }
       if (pixelInsideOtherAnimation(pixelx, pixely, mayCrashInto)) {
-        Serial.println("crash");
+        //Serial.println("crash");
         return false;
       }
     }
@@ -85,9 +85,9 @@ public:
     // R = ( 0  1 ) -> x = y ; y = -x
     //     ( -1 0 )
     for (auto &pixel : internal_pixels) {
-      int x = -pixel.y;
-      int y = pixel.x;
-      Serial.printf("ox: %d, oy: %d, rx: %d, ry: %d\n", pixel.x, pixel.y, x, y);
+      int x = (-(2*pixel.y-center_y)+center_x) / 2;
+      int y = pixel.x+(center_y-center_x)/2;
+      //Serial.printf("ox: %d, oy: %d, rx: %d, ry: %d\n", pixel.x, pixel.y, x, y);
       if (pixelOutsideScreen(x, y)) {
         cached_pixels.clear();
         return false;
@@ -215,6 +215,8 @@ public:
     offset_y = 0;
     offset_x_cache = 0;
     offset_y_cache = 0;
+    center_x = 0;
+    center_y = 0;
     cached_pixels.clear();
     internal_pixels.clear();
   }
@@ -227,6 +229,8 @@ protected:
   int offset_y;
   int offset_x_cache;
   int offset_y_cache;
+  int center_x;
+  int center_y;
   int display_width;
   int display_height;
 };
