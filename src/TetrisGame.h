@@ -35,25 +35,24 @@ public:
 
   void onKey(const Keyboard::key_state_map_t &keys) {
     int x_translate = 0;
-    bool rotated = false;
     for (const auto &entry : keys) {
       const int key = entry.first;
       const int presses = entry.second;
-      if (key == L_JOYSTICK_PIN && presses > 0) {
+      if (key == L_JOYSTICK_PIN && presses) {
         if (falling->canTranslate(-1, 0, floor)) {
           falling->unpaint();
           falling->useCachePixels();
           falling->paint();
         }
       }
-      if (key == R_JOYSTICK_PIN && presses > 0) {
+      if (key == R_JOYSTICK_PIN && presses) {
         if (falling->canTranslate(1, 0, floor)) {
           falling->unpaint();
           falling->useCachePixels();
           falling->paint();
         }
       }
-      if (key == D_JOYSTICK_PIN && presses > 0) {
+      if (key == D_JOYSTICK_PIN && presses) {
         // move element down as far as possible
         while (falling->canTranslate(0, -1, floor)) {
           falling->unpaint();
@@ -61,16 +60,16 @@ public:
           falling->paint();
         }
       }
-      if ((key == L_PUSH_PIN || key == R_PUSH_PIN) && presses > 0 && !rotated) {
+      if ((key == L_PUSH_PIN || key == R_PUSH_PIN || key == U_JOYSTICK_PIN) && presses) {
         if (falling->canRotate(floor)) {
           falling->unpaint();
           falling->useCachePixels();
           falling->paint();
-          rotated = true;
         }
       }
     }
     display.show();
+    last_millis += 20; // delay frame
   }
 
   /**
@@ -108,7 +107,7 @@ public:
         // future: funny animation for full row removal
         // and remove complete rows, get points
         int numDeletedRows = floor->removeFullLines();
-        points += numDeletedRows;
+        points += numDeletedRows * 50;
         point_leds.showNumberDec(points);
         // draw new floor
         floor->paint();
@@ -153,7 +152,6 @@ void run_tetris() {
   TetrisGame tetris = TetrisGame(display, PIXELS_X, PIXELS_Y, l8_left);
 
   tetris.start();
-  Serial.begin(115000);
 
   while (true) {
     // first handle keys, if any
@@ -162,6 +160,7 @@ void run_tetris() {
     {
       tetris.onKey(keys);
     }
+    
     // then call animation
     tetris.animate();
     if (tetris.hasEnded()) {
