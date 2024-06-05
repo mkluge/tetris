@@ -13,7 +13,7 @@ void renderBlood() {
         int last_millis = millis();
         // game logic
         idle++;
-        if (idle > 500) {
+        if (idle > 300) {
             return; // end the game for all
         }
 
@@ -37,6 +37,7 @@ void renderBlood() {
 #include "SpaceShooter.h"
 #include "Neo.h"
 #include "SnakeGame.h"
+#include "TetrisGame.h"
 
 
 // reference implementation for an empty game
@@ -98,8 +99,8 @@ class Laufschrift {
     " -    | ",
     "-      |",
     " -    | "};
-    const struct{char* name; int start; func prog; } games[2] = {
-        //{"Tetris", 40, dummygame},
+    const struct{char* name; int start; func prog; } games[3] = {
+        {"Tetris", 40, run_tetris},
         //{"Pong", 55, dummygame},
         {"Snake", 69, run_snake},
         //{"Flappybird", 85, dummygame},

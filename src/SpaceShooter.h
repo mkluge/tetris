@@ -101,7 +101,7 @@ void spaceshooter() {
             for (auto it = enemies.begin(); it != enemies.end(); it) {
                 if (it->x == shot->first && it->y == shot->second) {
                     it = enemies.erase(it);
-                    shotEnd++;
+                    shotEnd = true;
                     score+=50;
                 } else {
                     it++;
