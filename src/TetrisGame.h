@@ -28,7 +28,8 @@ public:
     timer_interval = 700;
     points = 0;
     point_leds.showNumberDec(points);
-    last_millis = millis();
+    last_render_millis = millis();
+    last_input_millis = millis();
   }
 
   void stop() {}
@@ -69,7 +70,16 @@ public:
       }
     }
     display.show();
-    last_millis += 20; // delay frame
+  }
+
+  bool canHandleInput() {
+    int millies = millis();
+    if (millies - last_input_millis > 20) {
+      last_input_millis = millies;
+      return true;
+    } else {
+      return false;
+    }
   }
 
   /**
@@ -79,7 +89,7 @@ public:
     // get the current millis, get the diff and
     // figure out, if we need to do a step
     unsigned millies = millis();
-    auto diff = millies - last_millis;
+    auto diff = millies - last_render_millis;
     if (diff >= timer_interval) {
       // OK, make a step
       // let element fall 1 step
@@ -120,7 +130,7 @@ public:
         falling->paint();
       }
       // store time of last action
-      last_millis = millies;
+      last_render_millis = millies;
       // decrease delay between steps
       // this increases game speed
       if (timer_interval > 100) {
@@ -145,7 +155,8 @@ private:
   TetrisPiece *falling;
   TetrisPiece *floor;
   unsigned long timer_interval;
-  unsigned long last_millis;
+  unsigned long last_render_millis;
+  unsigned long last_input_millis;
 };
 
 void run_tetris() {
@@ -155,10 +166,12 @@ void run_tetris() {
 
   while (true) {
     // first handle keys, if any
-    auto keys = keyboard.toggled();
-    if( keys.size() )
-    {
-      tetris.onKey(keys);
+    if (tetris.canHandleInput()) {
+      auto keys = keyboard.toggled();
+      if( keys.size() )
+      {
+        tetris.onKey(keys);
+      }
     }
     
     // then call animation
