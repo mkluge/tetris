@@ -91,7 +91,9 @@ public:
           if (pixel.y == (height - 1)) {
             // game finished
             display.clear();
+            stop();
             start();
+            return;
           }
         }
         // merge falling into floor

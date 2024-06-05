@@ -74,7 +74,6 @@ public:
    * pixel cache, cache incomplete if function returns false
    */
   bool canRotate(Animation *mayCrashInto) {
-    int direction = RIGHT;
     cached_pixels.clear();
     // rotation matrix in 2D is
     // R = ( cos(a) -sin(a))
@@ -86,19 +85,15 @@ public:
     // R = ( 0  1 ) -> x = y ; y = -x
     //     ( -1 0 )
     for (auto &pixel : internal_pixels) {
-      int x, y;
-      if (direction == RIGHT) {
-        x = -y;
-        y = x;
-      }
-      if (direction == LEFT) {
-        x = y;
-        y = -x;
-      }
+      int x = -pixel.y;
+      int y = pixel.x;
+      Serial.printf("ox: %d, oy: %d, rx: %d, ry: %d\n", pixel.x, pixel.y, x, y);
       if (pixelOutsideScreen(x, y)) {
+        cached_pixels.clear();
         return false;
       }
       if (pixelInsideOtherAnimation(x, y, mayCrashInto)) {
+        cached_pixels.clear();
         return false;
       }
       cached_pixels.push_back({x, y, pixel.color});
