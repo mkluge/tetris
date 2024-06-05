@@ -14,7 +14,7 @@ class TetrisPiece : public Animation {
 public:
   TetrisPiece(LEDDisplay &display) : Animation(display) {
     int avail_pieces = pieceTemplates.size();
-    variant = esp_random() % avail_pieces;
+    int variant = esp_random() % avail_pieces;
     // add pixels
     addPixels(pieceTemplates[variant]);
     // calculate offset_x and offset_y so that piece
@@ -22,8 +22,6 @@ public:
     auto bBox = boundingBox();
     offset_x = (display_width / 2) - ((bBox.end_x - bBox.start_x) / 2);
     offset_y = display.height() - bBox.end_y;
-    Serial.printf("offset x: %d\n", offset_x);
-    Serial.printf("offset y: %d\n", offset_y);
   }
 
   ~TetrisPiece() {}
@@ -72,6 +70,7 @@ public:
     internal_pixels = new_pixels;
   }
 
+private:
   const std::vector<PixelList> pieceTemplates = {
       // yellow rectangle
       {{-1, 0, TYELLOW}, {0, 0, TYELLOW}, {-1, -1, TYELLOW}, {0, -1, TYELLOW}},
@@ -88,9 +87,6 @@ public:
       // brown t
       {{-1, 0, TBROWN}, {0, 0, TBROWN}, {1, 0, TBROWN}, {0, -1, TBROWN}},
   };
-
-private:
-  int variant;
 };
 
 #endif

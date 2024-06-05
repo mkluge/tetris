@@ -6,9 +6,6 @@
 #include <TaskScheduler.h>
 #include <TM1637Display.h>
 #include <Keyboard.h>
-#include <SteinScherePapier.h>
-#include <Mandelbrot.h>
-#include <Plasma.h>
 
 // Module connection pins (Digital Pins)
 #define CLK_LEFT_LED 27
@@ -39,9 +36,6 @@ TM1637Display l8_left(CLK_LEFT_LED, DIO_LEFT_LED);
 TM1637Display l8_right(CLK_RIGHT_LED, DIO_RIGHT_LED);
 TetrisGame tetris = TetrisGame(display, PIXELS_X, PIXELS_Y, l8_right);
 Keyboard keyboard = Keyboard();
-SteinScherePapier<PIXELS_X, PIXELS_Y> ssp(display);
-Mandelbrot<PIXELS_X, PIXELS_Y> mandelbrot(display);
-Plasma<PIXELS_X, PIXELS_Y> plasma(display);
 
 int counter = 0;
 

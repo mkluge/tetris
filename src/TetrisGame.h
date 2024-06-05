@@ -22,7 +22,7 @@ public:
 
   void start() {
     floor = new TetrisPiece(display);
-    floor->clearPixels();
+    floor->clear();
     falling = new TetrisPiece(display);
     timer_interval = 700;
     points = 0;
@@ -119,6 +119,7 @@ public:
       if (timer_interval > 100) {
         timer_interval--;
       }
+      floor->paint();
       display.show();
     }
   }

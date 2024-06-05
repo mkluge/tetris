@@ -18,59 +18,21 @@ public:
   Animation(LEDDisplay &display) : display(display) {
     display_width = display.width();
     display_height = display.height();
-    offset_x = 0;
-    offset_y = 0;
-  }
-
-  /***
-   * calculates if a animation can be rotated clockwise
-   * without leaving the screen or crashing into the given
-   * animation, leaves calculated new pixels in the internal
-   * pixel cache, cache incomplete if function returns false
-   */
-  bool canRotate(Animation *mayCrashInto) {
-    int direction = RIGHT;
-    cache_pixels.clear();
-    // rotation matrix in 2D is
-    // R = ( cos(a) -sin(a))
-    //     ( sin(a)  cos(a))
-    // so 90 degrees is
-    // R = ( 0 -1 ) -> x = -y ; y = x
-    //     ( 1  0 )
-    // -90 dregees is:
-    // R = ( 0  1 ) -> x = y ; y = -x
-    //     ( -1 0 )
-    for (auto &pixel : internal_pixels) {
-      int x, y;
-      if (direction == RIGHT) {
-        x = offset_x - pixel.y;
-        y = offset_y + pixel.x;
-      }
-      if (direction == LEFT) {
-        x = offset_x + pixel.y;
-        y = offset_y - pixel.x;
-      }
-      if (pixelOutsideScreen(x, y)) {
-        return false;
-      }
-      if (pixelInside(x, y, mayCrashInto)) {
-        return false;
-      }
-      cache_pixels.push_back({x, y, pixel.color});
-    }
-    return true;
+    clear();
   }
 
   const bool pixelOutsideScreen(int x, int y) const {
-    if (x < 0 || x >= display_width || y < 0 || y >= display_height) {
+    if ((offset_x + x) < 0 || (offset_x + x) >= display_width ||
+        (offset_y + y) < 0 || (offset_y + y) >= display_height) {
       return true;
     }
     return false;
   }
 
-  const bool pixelInside(int x, int y, Animation *mayCrashInto) const {
+  const bool pixelInsideOtherAnimation(int x, int y,
+                                       Animation *mayCrashInto) const {
     for (const auto &fpix : mayCrashInto->getPixels()) {
-      if ((fpix.x == x) && (fpix.y == y)) {
+      if ((fpix.x == (offset_x + x)) && (fpix.y == (offset_y + y))) {
         return true;
       }
     }
@@ -85,21 +47,64 @@ public:
   bool canTranslate(int x, int y, Animation *mayCrashInto) {
     for (auto &pixel : internal_pixels) {
       // new place for this pixel
-      int pixelx = offset_x + pixel.x + x;
-      int pixely = offset_y + pixel.y + y;
+      int pixelx = pixel.x + x;
+      int pixely = pixel.y + y;
       // now check conditions
-      if (pixelOutsideScreen(x, y)) {
-        Serial.println(x);
-        Serial.println(y);
+      if (pixelOutsideScreen(pixelx, pixely)) {
+        Serial.println(pixelx);
+        Serial.println(pixely);
         Serial.println("outside");
         return false;
       }
-      if (pixelInside(x, y, mayCrashInto)) {
+      if (pixelInsideOtherAnimation(pixelx, pixely, mayCrashInto)) {
         Serial.println("crash");
         return false;
       }
-      cache_pixels.push_back({x, y, pixel.color});
     }
+    offset_x_cache = offset_x + x;
+    offset_y_cache = offset_y + y;
+    cached_pixels = internal_pixels;
+    return true;
+  }
+
+  /***
+   * calculates if a animation can be rotated clockwise
+   * without leaving the screen or crashing into the given
+   * animation, leaves calculated new pixels in the internal
+   * pixel cache, cache incomplete if function returns false
+   */
+  bool canRotate(Animation *mayCrashInto) {
+    int direction = RIGHT;
+    cached_pixels.clear();
+    // rotation matrix in 2D is
+    // R = ( cos(a) -sin(a))
+    //     ( sin(a)  cos(a))
+    // so 90 degrees is
+    // R = ( 0 -1 ) -> x = -y ; y = x
+    //     ( 1  0 )
+    // -90 dregees is:
+    // R = ( 0  1 ) -> x = y ; y = -x
+    //     ( -1 0 )
+    for (auto &pixel : internal_pixels) {
+      int x, y;
+      if (direction == RIGHT) {
+        x = -y;
+        y = x;
+      }
+      if (direction == LEFT) {
+        x = y;
+        y = -x;
+      }
+      if (pixelOutsideScreen(x, y)) {
+        return false;
+      }
+      if (pixelInsideOtherAnimation(x, y, mayCrashInto)) {
+        return false;
+      }
+      cached_pixels.push_back({x, y, pixel.color});
+    }
+    offset_x_cache = offset_x;
+    offset_y_cache = offset_y;
     return true;
   }
 
@@ -130,7 +135,11 @@ public:
     }
   }
 
-  void useCachePixels() { internal_pixels = cache_pixels; }
+  void useCachePixels() {
+    internal_pixels = cached_pixels;
+    offset_x = offset_x_cache;
+    offset_y = offset_y_cache;
+  }
 
   const Rect boundingBox() const {
     struct Rect retval = {display.width(), display.height(), 0, 0};
@@ -153,7 +162,7 @@ public:
     return retval;
   }
 
-  void paint(const int color_variation = 0) const {
+  void paint(const int color_variation = 0) {
     for (auto &pixel : internal_pixels) {
       auto color = pixel.color;
       // variate colors up to color_variation for rgb
@@ -176,7 +185,7 @@ public:
                                     (int)(color.blue + blue_variation))),
         };
       }
-      display.setPixel(pixel.x, pixel.y, color);
+      display.setPixel(pixel.x + offset_x, pixel.y + offset_y, color);
     }
   }
 
@@ -206,14 +215,23 @@ public:
     return retval;
   }
 
-  void clearPixels() { internal_pixels.clear(); }
+  void clear() {
+    offset_x = 0;
+    offset_y = 0;
+    offset_x_cache = 0;
+    offset_y_cache = 0;
+    cached_pixels.clear();
+    internal_pixels.clear();
+  }
 
 protected:
   LEDDisplay &display;
   PixelList internal_pixels;
-  PixelList cache_pixels;
+  PixelList cached_pixels;
   int offset_x;
   int offset_y;
+  int offset_x_cache;
+  int offset_y_cache;
   int display_width;
   int display_height;
 };
