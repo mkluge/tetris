@@ -23,18 +23,13 @@ void IRAM_ATTR Keyboard::isr()
             // store the 0
             if( !pressed )
             {
-                if( toggled_keys.find(kv.first) != toggled_keys.end() )
+                if( toggled_keys.find(kv.first) == toggled_keys.end() )
                 {
                     toggled_keys[kv.first]=0;
                 }
             } else {
             // if it was a press, store a 1 or increase
-                if( toggled_keys.find(kv.first) != toggled_keys.end() )
-                {
-                    toggled_keys[kv.first]=1;
-                } else {
-                    toggled_keys[kv.first]+=1;
-                }
+                toggled_keys[kv.first]+=1;
             }
             old_state[kv.first] = pressed;
         }                                      
@@ -46,12 +41,12 @@ void IRAM_ATTR Keyboard::isr()
 void Keyboard::addKey(int id, int pin)
 {
     pinMode(pin, INPUT_PULLUP);
-//    noInterrupts();
+    noInterrupts();
     keys[id] = pin;
-    // store initial "LOW" for each key
-    old_state[id]=false;
+    // read and negate as we are running low active
+    old_state[id]=!digitalRead(pin);
     attachInterrupt(pin, isr, CHANGE);
-//    interrupts();
+    interrupts();
 }
 
 
@@ -64,15 +59,9 @@ void Keyboard::addKey(int id, int pin)
 */       
 Keyboard::key_state_map_t Keyboard::toggled()
 {
-//    noInterrupts();
-    // copy current state
-    for (auto const &kv : keys)
-    {
-        old_state[kv.first] = digitalRead(kv.second);
-    }
+    noInterrupts();
     key_state_map_t retval = toggled_keys;
     toggled_keys.clear();
-//    interrupts();
+    interrupts();
     return retval;
 }
-

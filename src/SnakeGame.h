@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 //#include <HardwareSerial.h>
+#include <GameEvents.h>
 #include <LEDDisplay.h>
 #include <SnakePixel.h>
 #pragma once
@@ -115,10 +116,10 @@ class SnakeGame
                 0.0,
                 0.0);
         }
-        void applyKeyboardInputs()
+        void applyKeyboardInputs(const Keyboard::key_state_map_t &keys)
         {
             // keyboard events
-            for( const auto &key: keyboard.toggled()) {
+            for( const auto &key: keys) {
                 if (key.first == 18 && key.second && this->currentSnakeDirection != SnakeGame::SNAKE_DIRECTION::RIGHT) {
                     this->currentSnakeDirection = SnakeGame::SNAKE_DIRECTION::LEFT;
                 }
@@ -169,8 +170,6 @@ class SnakeGame
             return true;
         }
         bool snakeGameEngine() {
-            this->applyKeyboardInputs();
-
             // snake simulation
             if(0 == (this->counter % 6)) // be a little slower
             {
@@ -222,28 +221,31 @@ class SnakeGame
 // Lars disapproves of this coding style:
 void run_snake() {
     // initialization
-    int idle = 0;
-
     SnakeGame<8, 12> game(display);
     game.init();
+    GameEventLoop events(30);
 
     // main loop
     while (true) {
-        int last_millis = millis();
-
-        // game logic
-	if (game.snakeGameEngine()) {
-		return; // graceful exit
-	}
-
-        // game render
-        game.paint();
-
-        // busy waiting loop until next frame
-        while (millis() - last_millis < 30) {
-            // busy spin loop until frame time is over
+        GameEvent event;
+        if (!events.next(event)) {
+            continue;
         }
 
+        if (event.type == GameEventType::Key) {
+            game.applyKeyboardInputs(event.keys);
+            continue;
+        }
+
+        if (event.type != GameEventType::Timer) {
+            continue;
+        }
+
+        // game logic
+        if (game.snakeGameEngine()) {
+            return; // graceful exit
+        }
+        game.paint();
     }
 }
 

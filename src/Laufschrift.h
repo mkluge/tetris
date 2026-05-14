@@ -1,3 +1,4 @@
+#include <GameEvents.h>
 #include <LEDDisplay.h>
 
 
@@ -9,8 +10,12 @@ typedef void(*func)();
 
 void renderBlood() {
     int idle = 0;
+    GameEventLoop events(10);
     while (true) {
-        int last_millis = millis();
+        GameEvent event;
+        if (!events.next(event) || event.type != GameEventType::Timer) {
+            continue;
+        }
         // game logic
         idle++;
         if (idle > 300) {
@@ -25,12 +30,6 @@ void renderBlood() {
         color.blue = 0;
         display.setPixel(random(8), random(12), color);
         display.show();
-
-        // busy waiting loop until next frame
-        while (millis() - last_millis < 10) {
-            // busy spin loop until frame time is over
-        }
-
     }
 }
 
@@ -44,18 +43,28 @@ void renderBlood() {
 void dummygame() {
     // initialization
     int idle = 0;
+    GameEventLoop events(30);
 
     // main loop
     while (true) {
-        int last_millis = millis();
+        GameEvent event;
+        if (!events.next(event)) {
+            continue;
+        }
 
         // game input
-        auto events = keyboard.toggled();
-        for( const auto &key: events) {
-            if (/*key.first == 18 && */ key.second) {
-                // any key press
-                return; // get back to main
+        if (event.type == GameEventType::Key) {
+            for( const auto &key: event.keys) {
+                if (/*key.first == 18 && */ key.second) {
+                    // any key press
+                    return; // get back to main
+                }
             }
+            continue;
+        }
+
+        if (event.type != GameEventType::Timer) {
+            continue;
         }
 
         // game logic
@@ -72,12 +81,6 @@ void dummygame() {
         color.blue = random(256);
         display.setPixel(random(8), random(12), color);
         display.show();
-
-        // busy waiting loop until next frame
-        while (millis() - last_millis < 30) {
-            // busy spin loop until frame time is over
-        }
-
     }
 }
 
@@ -169,9 +172,41 @@ public:
         return color;
     }
 
+    void playStartTransition() {
+        int idle = 0;
+        GameEventLoop events(10);
+
+        for (int row = 11; row >= 0; row--) {
+            for (int brightness = 200; brightness >= 0; brightness-= 100) {
+                while (true) {
+                    GameEvent event;
+                    if (!events.next(event) || event.type != GameEventType::Timer) {
+                        continue;
+                    }
+
+                    // game logic
+                    idle++;
+
+                    // game render
+                    l8_left.showNumberDec(idle);
+                    RGB color;
+                    color.red = 255;
+                    color.green = 255;
+                    color.blue = 255;
+                    for (int col = 0; col < 8; col++) {
+                        display.setPixel(col, row, blendColor(color, brightness));
+                    }
+                    display.show();
+                    break;
+                }
+            }
+        }
+    }
+
     void run() {
         // init all variables
-        keyboard.toggled(); // flush keyboard input
+        GameEventLoop events(30);
+        events.reset();
         targetgame = -1;
         pos = 0;
         pos2 = 0;
@@ -179,45 +214,55 @@ public:
 
         // enter main loop
         while (true) {
-            auto last_millis = millis();
-            for (int i = 0; i < 9; i++) {
-                for (int j = 0; j < 8; j++) {
-                    display.setPixel(j, 11-i, getColor(image[i][(pos/scrollduration + j) % sz]));
-                }
+            GameEvent event;
+            if (!events.next(event)) {
+                continue;
             }
-            for (int i = 0; i < 3; i++) {
-                for (int j = 0; j < 8; j++) {
-                    auto color = getColor(image2[i][j]);
-                    display.setPixel(j, 2-i, color);
-                }
-            }
-            display.show();
-            pos2++; // light animation
-            //l8_left.showNumberDec(pos);
 
-            // animation logic
-            if (targetgame == -1) {
-                // scroll mode
-                pos = (pos + 1) % (scrollduration*sz);
-            } else {
-                // select mode
-                if (pos < games[targetgame].start*scrollduration) {
-                    pos += scrollduration;
+            if (event.type == GameEventType::Timer) {
+                for (int i = 0; i < 9; i++) {
+                    for (int j = 0; j < 8; j++) {
+                        display.setPixel(j, 11-i, getColor(image[i][(pos/scrollduration + j) % sz]));
+                    }
                 }
-                if (pos > games[targetgame].start*scrollduration) {
-                    pos -= scrollduration;
+                for (int i = 0; i < 3; i++) {
+                    for (int j = 0; j < 8; j++) {
+                        auto color = getColor(image2[i][j]);
+                        display.setPixel(j, 2-i, color);
+                    }
                 }
+                display.show();
+                pos2++; // light animation
+                //l8_left.showNumberDec(pos);
+
+                // animation logic
+                if (targetgame == -1) {
+                    // scroll mode
+                    pos = (pos + 1) % (scrollduration*sz);
+                } else {
+                    // select mode
+                    if (pos < games[targetgame].start*scrollduration) {
+                        pos += scrollduration;
+                    }
+                    if (pos > games[targetgame].start*scrollduration) {
+                        pos -= scrollduration;
+                    }
+                }
+                idle++;
+                if (idle > 500 && targetgame != -1) {
+                    idle = 0;
+                    targetgame = -1;
+                }
+                continue;
             }
-            idle++;
-            if (idle > 500 && targetgame != -1) {
-                idle = 0;
-                targetgame = -1;
+
+            if (event.type != GameEventType::Key) {
+                continue;
             }
 
             // key press logic
-            auto events = keyboard.toggled();
             int ngames = sizeof(games) / sizeof(games[0]);
-            for( const auto &key: events) {
+            for( const auto &key: event.keys) {
                 l8_left.showNumberDec(key.first);
                 l8_right.showNumberDec(key.second);
                 if (key.first == 18 && key.second) {
@@ -238,33 +283,7 @@ public:
                 }
                 if (targetgame != -1 && (key.first == 22 || key.first == 23) && key.second) {
                     // blend-over animation
-                    int idle = 0;
-
-                    // main loop
-                    for (int row = 11; row >= 0; row--) {
-                        for (int brightness = 200; brightness >= 0; brightness-= 100) {
-                            int last_millis = millis();
-
-                            // game logic
-                            idle++;
-
-                            // game render
-                            l8_left.showNumberDec(idle);
-                            RGB color;
-                            color.red = 255;
-                            color.green = 255;
-                            color.blue = 255;
-                            for (int col = 0; col < 8; col++) {
-                                display.setPixel(col, row, blendColor(color, brightness));
-                            }
-                            display.show();
-
-                            // busy waiting loop until next frame
-                            while (millis() - last_millis < 10) {
-                                // busy spin loop until frame time is over
-                            }
-                        }
-                    }
+                    playStartTransition();
                     display.clear();
                     display.show();
                     keyboard.toggled(); // flush all keyboard events
@@ -274,9 +293,6 @@ public:
                 }
             }
             //l8_right.showNumberDec(events.size());
-            while (millis() - last_millis < 30) {
-                // busy spin loop
-            }
         }
     }
 };

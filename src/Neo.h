@@ -2,6 +2,7 @@
 #define NEO_H
 
 #include <Arduino.h>
+#include <GameEvents.h>
 #include <array>
 #include <map>
 #include <FastTrig.h>
@@ -83,18 +84,28 @@ void run_neo() {
 
     Neo<8, 12> game(display);
     game.init();
+    GameEventLoop events(30);
 
     // main loop
     while (true) {
-        int last_millis = millis();
+        GameEvent event;
+        if (!events.next(event)) {
+            continue;
+        }
         
         // input
-        auto events = keyboard.toggled();
-        for( const auto &key: events) {
-            if (/*key.first == 18 && */ key.second) {
-                // any key press
-                return; // get back to main
+        if (event.type == GameEventType::Key) {
+            for( const auto &key: event.keys) {
+                if (/*key.first == 18 && */ key.second) {
+                    // any key press
+                    return; // get back to main
+                }
             }
+            continue;
+        }
+
+        if (event.type != GameEventType::Timer) {
+            continue;
         }
 
         // game logic
@@ -105,12 +116,6 @@ void run_neo() {
 
         // game render
         game.paint();
-
-        // busy waiting loop until next frame
-        while (millis() - last_millis < 30) {
-            // busy spin loop until frame time is over
-        }
-
     }
 }
 

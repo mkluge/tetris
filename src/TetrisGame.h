@@ -2,6 +2,7 @@
 #define TETRISGAME_H
 
 #include <GameInterface.h>
+#include <GameEvents.h>
 #include <Keyboard.h>
 #include <LEDDisplay.h>
 #include <TM1637Display.h>
@@ -28,14 +29,11 @@ public:
     timer_interval = 700;
     points = 0;
     point_leds.showNumberDec(points);
-    last_render_millis = millis();
-    last_input_millis = millis();
   }
 
   void stop() {}
 
   void onKey(const Keyboard::key_state_map_t &keys) {
-    int x_translate = 0;
     for (const auto &entry : keys) {
       const int key = entry.first;
       const int presses = entry.second;
@@ -72,25 +70,10 @@ public:
     display.show();
   }
 
-  bool canHandleInput() {
-    int millies = millis();
-    if (millies - last_input_millis > 20) {
-      last_input_millis = millies;
-      return true;
-    } else {
-      return false;
-    }
-  }
-
   /**
-   * animate is called as often as possible
+   * animate is called for each timer event
    */
   void animate() {
-    // get the current millis, get the diff and
-    // figure out, if we need to do a step
-    unsigned millies = millis();
-    auto diff = millies - last_render_millis;
-    if (diff >= timer_interval) {
       // OK, make a step
       // let element fall 1 step
       // remove old pixels
@@ -129,8 +112,6 @@ public:
         falling->useCachePixels();
         falling->paint();
       }
-      // store time of last action
-      last_render_millis = millies;
       // decrease delay between steps
       // this increases game speed
       if (timer_interval > 100) {
@@ -138,11 +119,14 @@ public:
       }
       floor->paint();
       display.show();
-    }
   }
 
   bool hasEnded() {
     return ended;
+  }
+
+  unsigned long timerInterval() const {
+    return timer_interval;
   }
 
 private:
@@ -155,30 +139,28 @@ private:
   TetrisPiece *falling;
   TetrisPiece *floor;
   unsigned long timer_interval;
-  unsigned long last_render_millis;
-  unsigned long last_input_millis;
 };
 
 void run_tetris() {
   TetrisGame tetris = TetrisGame(display, PIXELS_X, PIXELS_Y, l8_left);
 
   tetris.start();
+  GameEventLoop events(tetris.timerInterval());
 
   while (true) {
-    // first handle keys, if any
-    if (tetris.canHandleInput()) {
-      auto keys = keyboard.toggled();
-      if( keys.size() )
-      {
-        tetris.onKey(keys);
-      }
+    GameEvent event;
+    if (!events.next(event)) {
+      continue;
     }
-    
-    // then call animation
-    tetris.animate();
-    if (tetris.hasEnded()) {
-      renderBlood();
-      return;
+    if (event.type == GameEventType::Key) {
+      tetris.onKey(event.keys);
+    } else if (event.type == GameEventType::Timer) {
+      tetris.animate();
+      events.setTimerInterval(tetris.timerInterval());
+      if (tetris.hasEnded()) {
+        renderBlood();
+        return;
+      }
     }
   }
 }

@@ -1,5 +1,6 @@
 #include <vector>
 #include <utility>
+#include <GameEvents.h>
 
 class enemy_t {
     public:
@@ -54,30 +55,40 @@ void spaceshooter() {
     int score = 0;
     std::vector<enemy_t> enemies;
     enemies.push_back(enemy_t(2, 10));
+    GameEventLoop events(30);
 
     // main loop
     while (true) {
-        int last_millis = millis();
+        GameEvent event;
+        if (!events.next(event)) {
+            continue;
+        }
 
         // game input
-        auto events = keyboard.toggled();
-        for( const auto &key: events) {
-            idle = 0;
-            if ((key.first == 22 || key.first == 23) && key.second) {
-                // shoot
-                if (reload == 0) {
-                    reload = 3; // idle to reload
-                    shots.push_back(std::pair<int, int>(shipx, 1));
+        if (event.type == GameEventType::Key) {
+            for( const auto &key: event.keys) {
+                idle = 0;
+                if ((key.first == 22 || key.first == 23) && key.second) {
+                    // shoot
+                    if (reload == 0) {
+                        reload = 3; // idle to reload
+                        shots.push_back(std::pair<int, int>(shipx, 1));
+                    }
+                }
+                if (key.first == 18 && key.second && shipx > 0) {
+                    // move left
+                    shipx--;
+                }
+                if (key.first == 21 && key.second && shipx < 7) {
+                    // move right
+                    shipx++;
                 }
             }
-            if (key.first == 18 && key.second && shipx > 0) {
-                // move left
-                shipx--;
-            }
-            if (key.first == 21 && key.second && shipx < 7) {
-                // move right
-                shipx++;
-            }
+            continue;
+        }
+
+        if (event.type != GameEventType::Timer) {
+            continue;
         }
 
         // game logic
@@ -174,11 +185,5 @@ void spaceshooter() {
             display.setPixel(enemy.x, enemy.y, color);
         }
         display.show();
-
-        // busy waiting loop until next frame
-        while (millis() - last_millis < 30) {
-            // busy spin loop until frame time is over
-        }
-
     }
 }
