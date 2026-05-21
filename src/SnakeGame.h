@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 //#include <HardwareSerial.h>
+#include <Basics.h>
 #include <GameEvents.h>
 #include <LEDDisplay.h>
 #include <SnakePixel.h>
@@ -120,16 +121,16 @@ class SnakeGame
         {
             // keyboard events
             for( const auto &key: keys) {
-                if (key.first == 18 && key.second && this->currentSnakeDirection != SnakeGame::SNAKE_DIRECTION::RIGHT) {
+                if (key.first == L_JOYSTICK_PIN && key.second && this->currentSnakeDirection != SnakeGame::SNAKE_DIRECTION::RIGHT) {
                     this->currentSnakeDirection = SnakeGame::SNAKE_DIRECTION::LEFT;
                 }
-                if (key.first == 21 && key.second && this->currentSnakeDirection != SnakeGame::SNAKE_DIRECTION::LEFT) {
+                if (key.first == R_JOYSTICK_PIN && key.second && this->currentSnakeDirection != SnakeGame::SNAKE_DIRECTION::LEFT) {
                     this->currentSnakeDirection = SnakeGame::SNAKE_DIRECTION::RIGHT;
                 }
-                if (key.first == 19 && key.second && this->currentSnakeDirection != SnakeGame::SNAKE_DIRECTION::DOWN) {
+                if (key.first == U_JOYSTICK_PIN && key.second && this->currentSnakeDirection != SnakeGame::SNAKE_DIRECTION::DOWN) {
                     this->currentSnakeDirection = SnakeGame::SNAKE_DIRECTION::UP;
                 }
-                if (key.first == 3 && key.second && this->currentSnakeDirection != SnakeGame::SNAKE_DIRECTION::UP) {
+                if (key.first == D_JOYSTICK_PIN && key.second && this->currentSnakeDirection != SnakeGame::SNAKE_DIRECTION::UP) {
                     this->currentSnakeDirection = SnakeGame::SNAKE_DIRECTION::DOWN;
                 }
             }

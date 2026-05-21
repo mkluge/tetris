@@ -8,14 +8,14 @@
 
 // input pins
 #define DISPLAY_PIN 32
-#define D_JOYSTICK_PIN 3
+#define D_JOYSTICK_PIN 16
 #define R_JOYSTICK_PIN 21
 #define U_JOYSTICK_PIN 19
 #define L_JOYSTICK_PIN 18
 #define R_PUSH_PIN 22
 #define L_PUSH_PIN 23
-#define BUTTON_LEFT_LED 1
-#define BUTTON_RIGHT_LED 17
+#define BUTTON_LEFT_LED 13
+#define BUTTON_RIGHT_LED 14
 struct Rect {
     int start_x;
     int start_y;

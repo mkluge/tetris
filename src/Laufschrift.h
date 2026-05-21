@@ -265,7 +265,7 @@ public:
             for( const auto &key: event.keys) {
                 l8_left.showNumberDec(key.first);
                 l8_right.showNumberDec(key.second);
-                if (key.first == 18 && key.second) {
+                if (key.first == L_JOYSTICK_PIN && key.second) {
                     if (targetgame == -1) {
                         targetgame = ngames - 1;
                     } else if (targetgame > 0) {
@@ -273,7 +273,7 @@ public:
                     }
                     idle = 0;
                 }
-                if (key.first == 21 && key.second) {
+                if (key.first == R_JOYSTICK_PIN && key.second) {
                     if (targetgame == -1) {
                         targetgame = 0;
                     } else if (targetgame < ngames - 1) {
@@ -281,7 +281,7 @@ public:
                     }
                     idle = 0;
                 }
-                if (targetgame != -1 && (key.first == 22 || key.first == 23) && key.second) {
+                if (targetgame != -1 && (key.first == R_PUSH_PIN || key.first == L_PUSH_PIN) && key.second) {
                     // blend-over animation
                     playStartTransition();
                     display.clear();

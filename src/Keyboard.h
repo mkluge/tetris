@@ -20,9 +20,11 @@ public:
     key_state_map_t toggled();
 
 private:
+    inline static constexpr unsigned long debounce_us = 15000;
     inline static key_map_t keys;
     inline static key_state_map_t old_state;
     inline static key_state_map_t toggled_keys;
+    inline static std::map<int, unsigned long> last_change_us;
 };
 
 #endif

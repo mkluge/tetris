@@ -15,6 +15,12 @@ void IRAM_ATTR Keyboard::isr()
 {
     for( auto const &kv: keys)
     {
+        unsigned long now = micros();
+        if (now - last_change_us[kv.first] < debounce_us)
+        {
+            continue;
+        }
+
         // read and negate as we are running low active
         bool pressed = !digitalRead(kv.second);
         if (pressed != old_state[kv.first])    
@@ -32,6 +38,7 @@ void IRAM_ATTR Keyboard::isr()
                 toggled_keys[kv.first]+=1;
             }
             old_state[kv.first] = pressed;
+            last_change_us[kv.first] = now;
         }                                      
     }
 }
@@ -45,6 +52,7 @@ void Keyboard::addKey(int id, int pin)
     keys[id] = pin;
     // read and negate as we are running low active
     old_state[id]=!digitalRead(pin);
+    last_change_us[id] = micros();
     attachInterrupt(pin, isr, CHANGE);
     interrupts();
 }

@@ -1,5 +1,6 @@
 #include <vector>
 #include <utility>
+#include <Basics.h>
 #include <GameEvents.h>
 
 class enemy_t {
@@ -68,18 +69,18 @@ void spaceshooter() {
         if (event.type == GameEventType::Key) {
             for( const auto &key: event.keys) {
                 idle = 0;
-                if ((key.first == 22 || key.first == 23) && key.second) {
+                if ((key.first == R_PUSH_PIN || key.first == L_PUSH_PIN) && key.second) {
                     // shoot
                     if (reload == 0) {
                         reload = 3; // idle to reload
                         shots.push_back(std::pair<int, int>(shipx, 1));
                     }
                 }
-                if (key.first == 18 && key.second && shipx > 0) {
+                if (key.first == L_JOYSTICK_PIN && key.second && shipx > 0) {
                     // move left
                     shipx--;
                 }
-                if (key.first == 21 && key.second && shipx < 7) {
+                if (key.first == R_JOYSTICK_PIN && key.second && shipx < 7) {
                     // move right
                     shipx++;
                 }
