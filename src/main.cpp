@@ -5,6 +5,7 @@
 #include <TM1637Display.h>
 #include <Keyboard.h>
 #include <TestMode.h>
+#include <Plasma.h>
 
 // Module connection pins (Digital Pins)
 #define CLK_LEFT_LED 27
@@ -34,6 +35,7 @@ AdaNeoDisplay display = AdaNeoDisplay(native_display, PIXELS_X, PIXELS_Y);
 TM1637Display l8_left(CLK_LEFT_LED, DIO_LEFT_LED);
 TM1637Display l8_right(CLK_RIGHT_LED, DIO_RIGHT_LED);
 Keyboard keyboard = Keyboard();
+Plasma<PIXELS_X, PIXELS_Y> plasma(display);
 
 #include <Laufschrift.h>
 Laufschrift laufschrift(display);
@@ -63,9 +65,28 @@ void setup()
   pinMode(BUTTON_RIGHT_LED, OUTPUT);
   digitalWrite(BUTTON_LEFT_LED, 0);
   digitalWrite(BUTTON_RIGHT_LED, 0);
+  plasma.init();
 }
 
 void loop()
 {
-  laufschrift.run(); // dosen't return
+  int last_millis = millis();
+
+  auto events = keyboard.toggled();
+  for (const auto &key : events)
+  {
+    if (key.second)
+    {
+      laufschrift.run(); // returns after a game exits
+      plasma.init();
+      keyboard.toggled();
+      return;
+    }
+  }
+
+  plasma.paint();
+  while (millis() - last_millis < 30)
+  {
+    // keep the idle animation at the same frame rate as the menu
+  }
 }
