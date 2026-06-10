@@ -4,6 +4,7 @@
 #include <AdaNeoDisplay.h>
 #include <TM1637Display.h>
 #include <Keyboard.h>
+#include <TestMode.h>
 
 // Module connection pins (Digital Pins)
 #define CLK_LEFT_LED 27
@@ -51,6 +52,11 @@ void setup()
   for( const auto &key: input_pins)
   {
     keyboard.addKey( key, key);
+  }
+  if (isAnyTestInputPressed())
+  {
+    runHardwareTestMode(display, l8_left, l8_right);
+    keyboard.toggled();
   }
   display.clear();
   pinMode(BUTTON_LEFT_LED, OUTPUT);

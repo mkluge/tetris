@@ -85,27 +85,24 @@ void dummygame() {
 class Laufschrift {
     LEDDisplay &display;
     const char *image[12] = {
-    "  .....    .  .......    ......          -                                               yy       gggggggg                ",
-    " .......  ..  ........  ........         --                                              yy       g gggg g      g .     g ",
-    " ..       ..  ..    ..  ..               -                            ggggg          -   yy       gggggggg           y    ",
-    " ..       ..  ..    ..  .......        .     g           rv           g   g          |-  yy       gggggggg     v  |       ",
-    " ..       ..  ..    ..   .......       ..   ggg         w  w          g                           ggggg gg             g  ",
-    " ..       ..  ..    ..        ..       .g   v..        .    g         g                           gggggggg        -       ",
-    " ..       ..  ..    ..        ..       rg.  vrr        g    .         g   -                       gggggggg                ",
-    " .......  ..  ........   .......       rg.. vrr       .      y        g                  yy       gg ggggg        w       ",
-    "  .....   .   .......   .......        rg.y v..       v      -       gg                  yy       gggggggg       www      "};
-    // CIDS Tetris:39 Pong:54 Snake:69 Flappybird:82
+    "  .....    .  .......    ......          -                                      ",
+    " .......  ..  ........  ........         --                           g .     g ",
+    " ..       ..  ..    ..  ..               -              ggggg              y    ",
+    " ..       ..  ..    ..  .......        .     g          g   g        v  |       ",
+    " ..       ..  ..    ..   .......       ..   ggg         g                    g  ",
+    " ..       ..  ..    ..        ..       .g   v..         g               -       ",
+    " ..       ..  ..    ..        ..       rg.  vrr         g   -                   ",
+    " .......  ..  ........   .......       rg.. vrr         g               w       ",
+    "  .....   .   .......   .......        rg.y v..        gg              www      "};
+    // CIDS Tetris:39 Snake:55 Spaceshooter:69
     const char *image2[3] = {
     " -    | ",
     "-      |",
     " -    | "};
     const struct{char* name; int start; func prog; } games[3] = {
         {"Tetris", 40, run_tetris},
-        //{"Pong", 55, dummygame},
-        {"Snake", 69, run_snake},
-        //{"Flappybird", 85, dummygame},
-        //{"Matrix", 99, run_neo},
-        {"Spaceshooter", 111, spaceshooter},
+        {"Snake", 55, run_snake},
+        {"Spaceshooter", 69, spaceshooter},
     };
     int pos = 0;
     int pos2 = 0;
